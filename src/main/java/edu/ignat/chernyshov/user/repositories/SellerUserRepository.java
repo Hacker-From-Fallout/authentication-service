@@ -3,7 +3,6 @@ package edu.ignat.chernyshov.user.repositories;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -11,7 +10,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import edu.ignat.chernyshov.user.domain.authorities.SellerUserAuthority;
 import edu.ignat.chernyshov.user.domain.entities.SellerUser;
 
 @Repository
@@ -23,36 +21,48 @@ public interface SellerUserRepository extends JpaRepository<SellerUser, Long> {
     Optional<SellerUser> findByUsername(String username);
 
     @Modifying
-    @Query("UPDATE SellerUser u SET u.firstName = :firstName WHERE u.id = :id")
+    @Query(value = "UPDATE SellerUser u SET u.firstName = :firstName WHERE u.id = :id")
     void updateFirstName(@Param("id") Long id, @Param("firstName") String firstName);
 
     @Modifying
-    @Query("UPDATE SellerUser u SET u.lastName = :lastName WHERE u.id = :id")
+    @Query(value = "UPDATE SellerUser u SET u.lastName = :lastName WHERE u.id = :id")
     void updateLastName(@Param("id") Long id, @Param("lastName") String lastName);
 
     @Modifying
-    @Query("UPDATE SellerUser u SET u.phoneNumber = :phoneNumber WHERE u.id = :id")
+    @Query(value = "UPDATE SellerUser u SET u.phoneNumber = :phoneNumber WHERE u.id = :id")
     void updatePhoneNumber(@Param("id") Long id, @Param("phoneNumber") String phoneNumber);
 
     @Modifying
-    @Query("UPDATE SellerUser u SET u.email = :email WHERE u.id = :id")
+    @Query(value = "UPDATE SellerUser u SET u.email = :email WHERE u.id = :id")
     void updateEmail(@Param("id") Long id, @Param("email") String email);
 
     @Modifying
-    @Query("UPDATE SellerUser u SET u.username = :username WHERE u.id = :id")
+    @Query(value = "UPDATE SellerUser u SET u.username = :username WHERE u.id = :id")
     void updateUsername(@Param("id") Long id, @Param("username") String username);
 
     @Modifying
-    @Query("UPDATE SellerUser u SET u.hashPassword = :hashPassword WHERE u.id = :id")
+    @Query(value = "UPDATE SellerUser u SET u.hashPassword = :hashPassword WHERE u.id = :id")
     void updateHashPassword(@Param("id") Long id, @Param("hashPassword") String hashPassword);
 
     @Modifying
-    @Query("UPDATE SellerUser u SET u.lastLoginDate = :lastLoginDate WHERE u.id = :id")
+    @Query(value = "UPDATE SellerUser u SET u.lastLoginDate = :lastLoginDate WHERE u.id = :id")
     void updateLastLoginDate(@Param("id") Long id, @Param("lastLoginDate") LocalDateTime lastLoginDate);
 
     @Modifying
-    @Query("UPDATE SellerUser u SET u.authorities = :authorities WHERE u.id = :id")
-    void updateAuthorities(@Param("id") Long id, @Param("authorities") Set<SellerUserAuthority> authorities);
+    @Query("UPDATE SellerUser u SET u.accountNonExpired = :accountNonExpired WHERE u.id = :id")
+    void updateAccountNonExpired(@Param("id") Long id, @Param("accountNonExpired") boolean accountNonExpired);
+
+    @Modifying
+    @Query("UPDATE SellerUser u SET u.accountNonLocked = :accountNonLocked WHERE u.id = :id")
+    void updateAccountNonLocked(@Param("id") Long id, @Param("accountNonLocked") boolean accountNonLocked);
+
+    @Modifying
+    @Query("UPDATE SellerUser u SET u.credentialsNonExpired = :credentialsNonExpired WHERE u.id = :id")
+    void updateCredentialsNonExpired(@Param("id") Long id, @Param("credentialsNonExpired") boolean credentialsNonExpired);
+
+    @Modifying
+    @Query("UPDATE SellerUser u SET u.enabled = :enabled WHERE u.id = :id")
+    void updateEnabled(@Param("id") Long id, @Param("enabled") boolean valenabledue);
 
     @Modifying
     @Query(value = "INSERT INTO seller_user_authorities (user_id, authorities) VALUES (:userId, :authority)", nativeQuery = true)
@@ -61,8 +71,16 @@ public interface SellerUserRepository extends JpaRepository<SellerUser, Long> {
     @Modifying
     @Query(value = "DELETE FROM seller_user_authorities WHERE user_id = :userId AND authorities = :authority", nativeQuery = true)
     void removeAuthority(@Param("userId") Long userId, @Param("authority") String authority);
-    
-    void deleteById(Long id);
+
+    @Modifying
+    @Query(value = "INSERT INTO seller_user_roles (user_id, roles) VALUES (:userId, :role)", nativeQuery = true)
+    void addRole(@Param("userId") Long userId, @Param("role") String role);
+
+    @Modifying
+    @Query(value = "DELETE FROM seller_user_roles WHERE user_id = :userId AND roles = :role", nativeQuery = true)
+    void removeRole(@Param("userId") Long userId, @Param("role") String role);
+
+    void deleteById(@Param("id") Long id);
 
     boolean existsByEmail(String email);
     boolean existsByPhoneNumber(String phoneNumber);

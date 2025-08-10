@@ -47,6 +47,18 @@ public class CustomerUser extends User implements UserDetails {
     @Column(name = "authorities", nullable = false)
     private Set<CustomerUserAuthority> authorities;
 
+    @Column(name = "account_non_expired")
+    private boolean accountNonExpired;
+
+    @Column(name = "account_non_locked")
+    private boolean accountNonLocked;
+
+    @Column(name = "credentials_non_expired")
+    private boolean credentialsNonExpired;
+
+    @Column(name = "enabled")
+    private boolean enabled;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<SimpleGrantedAuthority> authorities = this.authorities.stream()
@@ -67,6 +79,26 @@ public class CustomerUser extends User implements UserDetails {
         return super.getHashPassword();
     }
 
+    @Override
+    public boolean isAccountNonExpired() {
+        return accountNonExpired;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return accountNonLocked;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return credentialsNonExpired;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
+    }
+
     public String toString() {
         System.out.println(super.getId());
         System.out.println(super.getFirstName());
@@ -77,6 +109,10 @@ public class CustomerUser extends User implements UserDetails {
         System.out.println(super.getHashPassword());
         System.out.println(super.getLastLoginDate());
         System.out.println(super.getRegistrationDate());
+        System.out.println(accountNonExpired);
+        System.out.println(accountNonLocked);
+        System.out.println(credentialsNonExpired);
+        System.out.println(enabled);
         System.out.println(getRoles().toString());
         System.out.println(getAuthorities().toString());
         return "";

@@ -1,4 +1,4 @@
-package pro.ignat.chernyshov.user_service;
+package pro.ignat.chernyshov.user;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

@@ -1,8 +1,8 @@
 package edu.ignat.chernyshov.user.services;
 
 import java.time.LocalDateTime;
+import java.util.EnumSet;
 import java.util.List;
-import java.util.Set;
 
 import edu.ignat.chernyshov.user.domain.authorities.RootUserAuthority;
 import edu.ignat.chernyshov.user.domain.authorities.RootUserRole;
@@ -16,12 +16,14 @@ public interface RootUserService {
     RootUser findByPhoneNumber(String phoneNumber);
     RootUser findByUsername(String username);
 
-    RootUser createUser(Set<RootUserRole> roles, Set<RootUserAuthority> authorities, 
-                            String firstName, String lastName, String username, String email,
+    RootUser createUser(EnumSet<RootUserRole> roles, EnumSet<RootUserAuthority> authorities,
+                            boolean accountNonExpired, boolean accountNonLocked, boolean credentialsNonExpired,
+                            boolean enabled, String firstName, String lastName, String username, String email,
                             String phoneNumber, String password);
 
-    RootUser updateUser(Long id, Set<RootUserRole> roles, Set<RootUserAuthority> authorities, 
-                            String firstName, String lastName, String username, String email, 
+    RootUser updateUser(Long id, EnumSet<RootUserRole> roles, EnumSet<RootUserAuthority> authorities,
+                            Boolean accountNonExpired, Boolean accountNonLocked, Boolean credentialsNonExpired,
+                            Boolean enabled, String firstName, String lastName, String username, String email, 
                             String phoneNumber, String password, LocalDateTime lastLoginDate);
 
     void updateFirstName(Long id, String firstName);
@@ -31,18 +33,22 @@ public interface RootUserService {
     void updateUsername(Long id, String username);
     void updateHashPassword(Long id, String hashPassword);
     void updateLastLoginDate(Long id, LocalDateTime lastLoginDate);
-    void updateRoles(Long id, Set<RootUserRole> roles);
-    void updateAuthorities(Long id, Set<RootUserAuthority> authorities);
+    void updateRoles(Long id, EnumSet<RootUserRole> roles);
+    void updateAuthorities(Long id, EnumSet<RootUserAuthority> authorities);
+    void updateAccountNonExpired(Long id, boolean accountNonExpired);
+    void updateAccountNonLocked(Long id,boolean accountNonLocked);
+    void updateCredentialsNonExpired(Long id, boolean credentialsNonExpired);
+    void updateEnabled(Long id, boolean enabled);
 
-    void addAuthority(Long userId, String authority);
-    void addAuthorities(Long userId, Set<RootUserAuthority> authorities);
-    void removeAuthority(Long userId, String authority);
-    void removeAuthorities(Long userId, Set<RootUserAuthority> authorities);
+    void addAuthority(Long userId, RootUserAuthority authority);
+    void addAuthorities(Long userId, EnumSet<RootUserAuthority> authorities);
+    void removeAuthority(Long userId, RootUserAuthority authority);
+    void removeAuthorities(Long userId, EnumSet<RootUserAuthority> authorities);
 
-    void addRole(Long userId, String role);
-    void addRoles(Long userId, Set<RootUserRole> roles);
-    void removeRole(Long userId, String role);
-    void removeRoles(Long userId, Set<RootUserRole> roles);
+    void addRole(Long userId, RootUserRole role);
+    void addRoles(Long userId, EnumSet<RootUserRole> roles);
+    void removeRole(Long userId, RootUserRole role);
+    void removeRoles(Long userId, EnumSet<RootUserRole> roles);
 
     void deleteById(Long id);
 }

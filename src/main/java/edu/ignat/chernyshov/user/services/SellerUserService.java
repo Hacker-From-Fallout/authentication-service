@@ -1,8 +1,8 @@
 package edu.ignat.chernyshov.user.services;
 
 import java.time.LocalDateTime;
+import java.util.EnumSet;
 import java.util.List;
-import java.util.Set;
 
 import edu.ignat.chernyshov.user.domain.authorities.SellerUserAuthority;
 import edu.ignat.chernyshov.user.domain.authorities.SellerUserRole;
@@ -16,12 +16,14 @@ public interface SellerUserService {
     SellerUser findByPhoneNumber(String phoneNumber);
     SellerUser findByUsername(String username);
 
-    SellerUser createUser(Set<SellerUserRole> roles, Set<SellerUserAuthority> authorities, 
-                            String firstName, String lastName, String username, String email,
+    SellerUser createUser(EnumSet<SellerUserRole> roles, EnumSet<SellerUserAuthority> authorities,
+                            boolean accountNonExpired, boolean accountNonLocked, boolean credentialsNonExpired,
+                            boolean enabled, String firstName, String lastName, String username, String email,
                             String phoneNumber, String password);
 
-    SellerUser updateUser(Long id, Set<SellerUserRole> roles, Set<SellerUserAuthority> authorities, 
-                            String firstName, String lastName, String username, String email, 
+    SellerUser updateUser(Long id, EnumSet<SellerUserRole> roles, EnumSet<SellerUserAuthority> authorities,
+                            Boolean accountNonExpired, Boolean accountNonLocked, Boolean credentialsNonExpired,
+                            Boolean enabled, String firstName, String lastName, String username, String email, 
                             String phoneNumber, String password, LocalDateTime lastLoginDate);
 
     void updateFirstName(Long id, String firstName);
@@ -31,18 +33,22 @@ public interface SellerUserService {
     void updateUsername(Long id, String username);
     void updateHashPassword(Long id, String hashPassword);
     void updateLastLoginDate(Long id, LocalDateTime lastLoginDate);
-    void updateRoles(Long id, Set<SellerUserRole> roles);
-    void updateAuthorities(Long id, Set<SellerUserAuthority> authorities);
+    void updateRoles(Long id, EnumSet<SellerUserRole> roles);
+    void updateAuthorities(Long id, EnumSet<SellerUserAuthority> authorities);
+    void updateAccountNonExpired(Long id, boolean accountNonExpired);
+    void updateAccountNonLocked(Long id,boolean accountNonLocked);
+    void updateCredentialsNonExpired(Long id, boolean credentialsNonExpired);
+    void updateEnabled(Long id, boolean enabled);
 
-    void addAuthority(Long userId, String authority);
-    void addAuthorities(Long userId, Set<SellerUserAuthority> authorities);
-    void removeAuthority(Long userId, String authority);
-    void removeAuthorities(Long userId, Set<SellerUserAuthority> authorities);
+    void addAuthority(Long userId, SellerUserAuthority authority);
+    void addAuthorities(Long userId, EnumSet<SellerUserAuthority> authorities);
+    void removeAuthority(Long userId, SellerUserAuthority authority);
+    void removeAuthorities(Long userId, EnumSet<SellerUserAuthority> authorities);
 
-    void addRole(Long userId, String role);
-    void addRoles(Long userId, Set<SellerUserRole> roles);
-    void removeRole(Long userId, String role);
-    void removeRoles(Long userId, Set<SellerUserRole> roles);
+    void addRole(Long userId, SellerUserRole role);
+    void addRoles(Long userId, EnumSet<SellerUserRole> roles);
+    void removeRole(Long userId, SellerUserRole role);
+    void removeRoles(Long userId, EnumSet<SellerUserRole> roles);
 
     void deleteById(Long id);
 }

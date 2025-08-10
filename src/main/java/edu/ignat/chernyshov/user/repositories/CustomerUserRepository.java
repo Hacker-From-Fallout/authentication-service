@@ -3,7 +3,6 @@ package edu.ignat.chernyshov.user.repositories;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -22,55 +21,65 @@ public interface CustomerUserRepository extends JpaRepository<CustomerUser, Long
     Optional<CustomerUser> findByUsername(String username);
 
     @Modifying
-    @Query("UPDATE CustomerUser u SET u.firstName = :firstName WHERE u.id = :id")
+    @Query(value = "UPDATE CustomerUser u SET u.firstName = :firstName WHERE u.id = :id")
     void updateFirstName(@Param("id") Long id, @Param("firstName") String firstName);
 
     @Modifying
-    @Query("UPDATE CustomerUser u SET u.lastName = :lastName WHERE u.id = :id")
+    @Query(value = "UPDATE CustomerUser u SET u.lastName = :lastName WHERE u.id = :id")
     void updateLastName(@Param("id") Long id, @Param("lastName") String lastName);
 
     @Modifying
-    @Query("UPDATE CustomerUser u SET u.phoneNumber = :phoneNumber WHERE u.id = :id")
+    @Query(value = "UPDATE CustomerUser u SET u.phoneNumber = :phoneNumber WHERE u.id = :id")
     void updatePhoneNumber(@Param("id") Long id, @Param("phoneNumber") String phoneNumber);
 
     @Modifying
-    @Query("UPDATE CustomerUser u SET u.email = :email WHERE u.id = :id")
+    @Query(value = "UPDATE CustomerUser u SET u.email = :email WHERE u.id = :id")
     void updateEmail(@Param("id") Long id, @Param("email") String email);
 
     @Modifying
-    @Query("UPDATE CustomerUser u SET u.username = :username WHERE u.id = :id")
+    @Query(value = "UPDATE CustomerUser u SET u.username = :username WHERE u.id = :id")
     void updateUsername(@Param("id") Long id, @Param("username") String username);
 
     @Modifying
-    @Query("UPDATE CustomerUser u SET u.hashPassword = :hashPassword WHERE u.id = :id")
+    @Query(value = "UPDATE CustomerUser u SET u.hashPassword = :hashPassword WHERE u.id = :id")
     void updateHashPassword(@Param("id") Long id, @Param("hashPassword") String hashPassword);
 
     @Modifying
-    @Query("UPDATE CustomerUser u SET u.lastLoginDate = :lastLoginDate WHERE u.id = :id")
+    @Query(value = "UPDATE CustomerUser u SET u.lastLoginDate = :lastLoginDate WHERE u.id = :id")
     void updateLastLoginDate(@Param("id") Long id, @Param("lastLoginDate") LocalDateTime lastLoginDate);
 
     @Modifying
-    @Query("UPDATE CustomerUser u SET u.authorities = :authorities WHERE u.id = :id")
-    void updateAuthorities(@Param("id") Long id, @Param("authorities") Set<String> authorities);
+    @Query("UPDATE CustomerUser u SET u.accountNonExpired = :accountNonExpired WHERE u.id = :id")
+    void updateAccountNonExpired(@Param("id") Long id, @Param("accountNonExpired") boolean accountNonExpired);
+
+    @Modifying
+    @Query("UPDATE CustomerUser u SET u.accountNonLocked = :accountNonLocked WHERE u.id = :id")
+    void updateAccountNonLocked(@Param("id") Long id, @Param("accountNonLocked") boolean accountNonLocked);
+
+    @Modifying
+    @Query("UPDATE CustomerUser u SET u.credentialsNonExpired = :credentialsNonExpired WHERE u.id = :id")
+    void updateCredentialsNonExpired(@Param("id") Long id, @Param("credentialsNonExpired") boolean credentialsNonExpired);
+
+    @Modifying
+    @Query("UPDATE CustomerUser u SET u.enabled = :enabled WHERE u.id = :id")
+    void updateEnabled(@Param("id") Long id, @Param("enabled") boolean valenabledue);
 
     @Modifying
     @Query(value = "INSERT INTO customer_user_authorities (user_id, authorities) VALUES (:userId, :authority)", nativeQuery = true)
     void addAuthority(@Param("userId") Long userId, @Param("authority") String authority);
 
     @Modifying
-    @Query(value = "INSERT INTO customer_user_authorities (user_id, authorities) VALUES (:userId, :authority)", nativeQuery = true)
-    void addAuthorities(@Param("userId") Long userId, @Param("authorities") Set<String> authorities);
-
-    @Modifying
     @Query(value = "DELETE FROM customer_user_authorities WHERE user_id = :userId AND authorities = :authority", nativeQuery = true)
     void removeAuthority(@Param("userId") Long userId, @Param("authority") String authority);
 
     @Modifying
-    @Query(value = "DELETE FROM customer_user_authorities WHERE user_id = :userId AND authorities IN (:authorities)", nativeQuery = true)
-    void removeAuthorities(@Param("userId") Long userId, @Param("authorities") Set<String> authorities);
+    @Query(value = "INSERT INTO customer_user_roles (user_id, roles) VALUES (:userId, :role)", nativeQuery = true)
+    void addRole(@Param("userId") Long userId, @Param("role") String role);
 
     @Modifying
-    @Query("DELETE FROM CustomerUser u WHERE u.id = :id")
+    @Query(value = "DELETE FROM customer_user_roles WHERE user_id = :userId AND roles = :role", nativeQuery = true)
+    void removeRole(@Param("userId") Long userId, @Param("role") String role);
+
     void deleteById(@Param("id") Long id);
 
     boolean existsByEmail(String email);
