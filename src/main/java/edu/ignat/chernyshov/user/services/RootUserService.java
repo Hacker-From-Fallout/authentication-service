@@ -17,14 +17,16 @@ public interface RootUserService {
     RootUser findByUsername(String username);
 
     RootUser createUser(EnumSet<RootUserRole> roles, EnumSet<RootUserAuthority> authorities,
-                            boolean accountNonExpired, boolean accountNonLocked, boolean credentialsNonExpired,
-                            boolean enabled, String firstName, String lastName, String username, String email,
+                            boolean accountNonExpired, boolean accountNonLocked, 
+                            boolean credentialsNonExpired, boolean enabled, String firstName, 
+                            String lastName, String username, String email,
                             String phoneNumber, String password);
 
     RootUser updateUser(Long id, EnumSet<RootUserRole> roles, EnumSet<RootUserAuthority> authorities,
-                            Boolean accountNonExpired, Boolean accountNonLocked, Boolean credentialsNonExpired,
-                            Boolean enabled, String firstName, String lastName, String username, String email, 
-                            String phoneNumber, String password, LocalDateTime lastLoginDate);
+                            Boolean accountNonExpired, Boolean accountNonLocked, 
+                            Boolean credentialsNonExpired, Boolean enabled, String firstName, 
+                            String lastName, String username, String email, String phoneNumber, 
+                            String password, LocalDateTime lastLoginDate);
 
     void updateFirstName(Long id, String firstName);
     void updateLastName(Long id, String lastName);

@@ -60,15 +60,17 @@ public class SellerUserServiceImpl implements SellerUserService {
 
     @Override
     @Transactional()
-    public SellerUser createUser(EnumSet<SellerUserRole> roles, EnumSet<SellerUserAuthority> authorities,
-                            boolean accountNonExpired, boolean accountNonLocked, boolean credentialsNonExpired,
-                            boolean enabled, String firstName, String lastName, String username, String email,
+    public SellerUser createUser(Long organizationId, EnumSet<SellerUserRole> roles, 
+                            EnumSet<SellerUserAuthority> authorities, boolean accountNonExpired,
+                            boolean accountNonLocked, boolean credentialsNonExpired, boolean enabled, 
+                            String firstName, String lastName, String username, String email,
                             String phoneNumber, String password) {
         existsByUsername(username);
         existsByEmail(email);
         existsByPhoneNumber(phoneNumber);
 
         SellerUser sellerUser = SellerUser.builder()
+                .organizationId(organizationId)
                 .roles(roles)
                 .authorities(authorities)
                 .accountNonExpired(accountNonExpired)
@@ -88,10 +90,12 @@ public class SellerUserServiceImpl implements SellerUserService {
 
     @Override
     @Transactional()
-    public SellerUser updateUser(Long id, EnumSet<SellerUserRole> roles, EnumSet<SellerUserAuthority> authorities,
-                            Boolean accountNonExpired, Boolean accountNonLocked, Boolean credentialsNonExpired,
-                            Boolean enabled, String firstName, String lastName, String username, String email, 
-                            String phoneNumber, String password, LocalDateTime lastLoginDate) {
+    public SellerUser updateUser(Long id, EnumSet<SellerUserRole> roles, 
+                            EnumSet<SellerUserAuthority> authorities, Boolean accountNonExpired, 
+                            Boolean accountNonLocked, Boolean credentialsNonExpired, 
+                            Boolean enabled, String firstName, String lastName, 
+                            String username, String email, String phoneNumber, 
+                            String password, LocalDateTime lastLoginDate) {
         SellerUser sellerUser = SellerUserRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с id: " + id));
 

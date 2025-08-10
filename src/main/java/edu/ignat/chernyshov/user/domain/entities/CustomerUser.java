@@ -22,6 +22,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
@@ -35,12 +36,14 @@ import lombok.experimental.SuperBuilder;
 @Table(name = "customer_users")
 public class CustomerUser extends User implements UserDetails {
 
+    @NonNull
     @ElementCollection(targetClass = CustomerUserRole.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "customer_user_roles", joinColumns = @JoinColumn(name = "user_id"))
     @Enumerated(EnumType.STRING)
     @Column(name = "roles", nullable = false)
     private Set<CustomerUserRole> roles;
 
+    @NonNull
     @ElementCollection(targetClass = CustomerUserAuthority.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "customer_user_authorities", joinColumns = @JoinColumn(name = "user_id"))
     @Enumerated(EnumType.STRING)

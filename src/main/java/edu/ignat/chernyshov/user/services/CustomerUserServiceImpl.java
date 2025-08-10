@@ -60,10 +60,12 @@ public class CustomerUserServiceImpl implements CustomerUserService {
 
     @Override
     @Transactional()
-    public CustomerUser createUser(EnumSet<CustomerUserRole> roles, EnumSet<CustomerUserAuthority> authorities,
-                            boolean accountNonExpired, boolean accountNonLocked, boolean credentialsNonExpired,
-                            boolean enabled, String firstName, String lastName, String username, String email,
-                            String phoneNumber, String password) {
+    public CustomerUser createUser(EnumSet<CustomerUserRole> roles, 
+                            EnumSet<CustomerUserAuthority> authorities,
+                            boolean accountNonExpired, boolean accountNonLocked, 
+                            boolean credentialsNonExpired, boolean enabled, 
+                            String firstName, String lastName, String username, 
+                            String email, String phoneNumber, String password) {
         existsByUsername(username);
         existsByEmail(email);
         existsByPhoneNumber(phoneNumber);
@@ -88,9 +90,10 @@ public class CustomerUserServiceImpl implements CustomerUserService {
 
     @Override
     @Transactional()
-    public CustomerUser updateUser(Long id, EnumSet<CustomerUserRole> roles, EnumSet<CustomerUserAuthority> authorities,
-                            Boolean accountNonExpired, Boolean accountNonLocked, Boolean credentialsNonExpired,
-                            Boolean enabled, String firstName, String lastName, String username, String email, 
+    public CustomerUser updateUser(Long id, EnumSet<CustomerUserRole> roles, 
+                            EnumSet<CustomerUserAuthority> authorities, Boolean accountNonExpired, 
+                            Boolean accountNonLocked, Boolean credentialsNonExpired, Boolean enabled, 
+                            String firstName, String lastName, String username, String email, 
                             String phoneNumber, String password, LocalDateTime lastLoginDate) {
         CustomerUser customerUser = customerUserRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с id: " + id));

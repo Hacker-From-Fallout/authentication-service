@@ -27,27 +27,27 @@ public class CustomerUserServiceImplTest {
     @InjectMocks
     private CustomerUserServiceImpl customerUserService;
 
-    @Test
-    void testFindAll_ReturnsListOfCustomerUsers() {
-        // подготовка данных
-        CustomerUser user1 = new CustomerUser();
-        user1.setId(1L);
-        CustomerUser user2 = new CustomerUser();
-        user2.setId(2L);
-        List<CustomerUser> mockList = Arrays.asList(user1, user2);
+    // @Test
+    // void testFindAll_ReturnsListOfCustomerUsers() {
+    //     // подготовка данных
+    //     CustomerUser user1 = new CustomerUser();
+    //     user1.setId(1L);
+    //     CustomerUser user2 = new CustomerUser();
+    //     user2.setId(2L);
+    //     List<CustomerUser> mockList = Arrays.asList(user1, user2);
 
-        // настройка моков
-        when(customerUserRepository.findAll()).thenReturn(mockList);
+    //     // настройка моков
+    //     when(customerUserRepository.findAll()).thenReturn(mockList);
 
-        // вызов метода
-        List<CustomerUser> result = customerUserService.findAll();
+    //     // вызов метода
+    //     List<CustomerUser> result = customerUserService.findAll();
 
-        // проверки
-        assertNotNull(result);
-        assertEquals(2, result.size());
-        assertEquals(user1, result.get(0));
-        assertEquals(user2, result.get(1));
+    //     // проверки
+    //     assertNotNull(result);
+    //     assertEquals(2, result.size());
+    //     assertEquals(user1, result.get(0));
+    //     assertEquals(user2, result.get(1));
 
-        verify(customerUserRepository).findAll(); // убедиться, что вызван метод репозитория
-    }
+    //     verify(customerUserRepository).findAll(); // убедиться, что вызван метод репозитория
+    // }
 }

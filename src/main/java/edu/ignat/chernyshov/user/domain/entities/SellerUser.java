@@ -20,8 +20,10 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
@@ -35,12 +37,19 @@ import lombok.experimental.SuperBuilder;
 @Table(name = "seller_users")
 public class SellerUser extends User implements UserDetails {
 
+    @NonNull
+    @Column(name = "organization_id", nullable = false)
+    @Setter(AccessLevel.NONE)
+    private Long organizationId;
+
+    @NonNull
     @ElementCollection(targetClass = SellerUserRole.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "seller_user_roles", joinColumns = @JoinColumn(name = "user_id"))
     @Enumerated(EnumType.STRING)
     @Column(name = "roles", nullable = false)
     private Set<SellerUserRole> roles;
 
+    @NonNull
     @ElementCollection(targetClass = SellerUserAuthority.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "seller_user_authorities", joinColumns = @JoinColumn(name = "user_id"))
     @Enumerated(EnumType.STRING)

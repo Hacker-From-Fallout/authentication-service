@@ -10,7 +10,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-public record CustomerUserCreateDto(
+public record RootUserCreateDto(
     @NotNull(message = "Roles must be provided")
     EnumSet<CustomerUserRole> roles,
 
@@ -51,4 +51,4 @@ public record CustomerUserCreateDto(
     @NotBlank(message = "Password is required")
     @Size(min = 8, message = "Password must be at least 8 characters")
     String password
-) {} 
+) {}

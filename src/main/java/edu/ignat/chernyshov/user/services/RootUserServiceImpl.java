@@ -61,8 +61,9 @@ public class RootUserServiceImpl implements RootUserService {
     @Override
     @Transactional()
     public RootUser createUser(EnumSet<RootUserRole> roles, EnumSet<RootUserAuthority> authorities,
-                            boolean accountNonExpired, boolean accountNonLocked, boolean credentialsNonExpired,
-                            boolean enabled, String firstName, String lastName, String username, String email,
+                            boolean accountNonExpired, boolean accountNonLocked, 
+                            boolean credentialsNonExpired, boolean enabled, String firstName, 
+                            String lastName, String username, String email,
                             String phoneNumber, String password) {
         existsByUsername(username);
         existsByEmail(email);
@@ -88,9 +89,10 @@ public class RootUserServiceImpl implements RootUserService {
 
     @Override
     @Transactional()
-    public RootUser updateUser(Long id, EnumSet<RootUserRole> roles, EnumSet<RootUserAuthority> authorities,
-                            Boolean accountNonExpired, Boolean accountNonLocked, Boolean credentialsNonExpired,
-                            Boolean enabled, String firstName, String lastName, String username, String email, 
+    public RootUser updateUser(Long id, EnumSet<RootUserRole> roles, 
+                            EnumSet<RootUserAuthority> authorities, Boolean accountNonExpired, 
+                            Boolean accountNonLocked, Boolean credentialsNonExpired, Boolean enabled, 
+                            String firstName, String lastName, String username, String email, 
                             String phoneNumber, String password, LocalDateTime lastLoginDate) {
         RootUser rootUser = RootUserRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с id: " + id));

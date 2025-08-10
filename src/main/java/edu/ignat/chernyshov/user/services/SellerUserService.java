@@ -16,15 +16,17 @@ public interface SellerUserService {
     SellerUser findByPhoneNumber(String phoneNumber);
     SellerUser findByUsername(String username);
 
-    SellerUser createUser(EnumSet<SellerUserRole> roles, EnumSet<SellerUserAuthority> authorities,
-                            boolean accountNonExpired, boolean accountNonLocked, boolean credentialsNonExpired,
-                            boolean enabled, String firstName, String lastName, String username, String email,
-                            String phoneNumber, String password);
+    SellerUser createUser(Long organizationId, EnumSet<SellerUserRole> roles, 
+                            EnumSet<SellerUserAuthority> authorities, boolean accountNonExpired, 
+                            boolean accountNonLocked, boolean credentialsNonExpired,
+                            boolean enabled, String firstName, String lastName, String username, 
+                            String email, String phoneNumber, String password);
 
     SellerUser updateUser(Long id, EnumSet<SellerUserRole> roles, EnumSet<SellerUserAuthority> authorities,
-                            Boolean accountNonExpired, Boolean accountNonLocked, Boolean credentialsNonExpired,
-                            Boolean enabled, String firstName, String lastName, String username, String email, 
-                            String phoneNumber, String password, LocalDateTime lastLoginDate);
+                            Boolean accountNonExpired, Boolean accountNonLocked, 
+                            Boolean credentialsNonExpired, Boolean enabled, String firstName, 
+                            String lastName, String username, String email, String phoneNumber, 
+                            String password, LocalDateTime lastLoginDate);
 
     void updateFirstName(Long id, String firstName);
     void updateLastName(Long id, String lastName);

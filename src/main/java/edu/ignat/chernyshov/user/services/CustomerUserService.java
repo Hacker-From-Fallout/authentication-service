@@ -16,14 +16,17 @@ public interface CustomerUserService {
     CustomerUser findByPhoneNumber(String phoneNumber);
     CustomerUser findByUsername(String username);
 
-    CustomerUser createUser(EnumSet<CustomerUserRole> roles, EnumSet<CustomerUserAuthority> authorities,
-                            boolean accountNonExpired, boolean accountNonLocked, boolean credentialsNonExpired,
-                            boolean enabled, String firstName, String lastName, String username, String email,
+    CustomerUser createUser(EnumSet<CustomerUserRole> roles, 
+                            EnumSet<CustomerUserAuthority> authorities,
+                            boolean accountNonExpired, boolean accountNonLocked, 
+                            boolean credentialsNonExpired, boolean enabled, String firstName,
+                            String lastName, String username, String email,
                             String phoneNumber, String password);
 
-    CustomerUser updateUser(Long id, EnumSet<CustomerUserRole> roles, EnumSet<CustomerUserAuthority> authorities,
-                            Boolean accountNonExpired, Boolean accountNonLocked, Boolean credentialsNonExpired,
-                            Boolean enabled, String firstName, String lastName, String username, String email, 
+    CustomerUser updateUser(Long id, EnumSet<CustomerUserRole> roles, 
+                            EnumSet<CustomerUserAuthority> authorities, Boolean accountNonExpired, 
+                            Boolean accountNonLocked, Boolean credentialsNonExpired, Boolean enabled, 
+                            String firstName, String lastName, String username, String email, 
                             String phoneNumber, String password, LocalDateTime lastLoginDate);
 
     void updateFirstName(Long id, String firstName);
