@@ -10,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import edu.ignat.chernyshov.user.domain.authorities.CustomerUserAuthority;
 import edu.ignat.chernyshov.user.domain.authorities.CustomerUserRole;
+import edu.ignat.chernyshov.user.domain.dto.request.CustomerUserCreateDto;
+import edu.ignat.chernyshov.user.domain.dto.request.CustomerUserUpdateDto;
 import edu.ignat.chernyshov.user.domain.entities.CustomerUser;
 import edu.ignat.chernyshov.user.exception.exceptions.AlreadyExistsException;
 import edu.ignat.chernyshov.user.exception.exceptions.UserNotFoundException;
@@ -18,7 +20,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class CustomerUserServiceImpl implements CustomerUserService {
+public class DefaultCustomerUserService implements CustomerUserService {
 
     private final CustomerUserRepository customerUserRepository;
     private final PasswordEncoder bCyPasswordEncoder;
@@ -59,30 +61,25 @@ public class CustomerUserServiceImpl implements CustomerUserService {
     }
 
     @Override
-    @Transactional()
-    public CustomerUser createUser(EnumSet<CustomerUserRole> roles, 
-                            EnumSet<CustomerUserAuthority> authorities,
-                            boolean accountNonExpired, boolean accountNonLocked, 
-                            boolean credentialsNonExpired, boolean enabled, 
-                            String firstName, String lastName, String username, 
-                            String email, String phoneNumber, String password) {
-        existsByUsername(username);
-        existsByEmail(email);
-        existsByPhoneNumber(phoneNumber);
+    @Transactional
+    public CustomerUser createUser(CustomerUserCreateDto dto) {
+        existsByUsername(dto.username());
+        existsByEmail(dto.email());
+        existsByPhoneNumber(dto.phoneNumber());
 
         CustomerUser customerUser = CustomerUser.builder()
-                .roles(roles)
-                .authorities(authorities)
-                .accountNonExpired(accountNonExpired)
-                .accountNonLocked(accountNonLocked)
-                .credentialsNonExpired(credentialsNonExpired)
-                .enabled(enabled)
-                .firstName(firstName)
-                .lastName(lastName)
-                .username(username)
-                .email(email)
-                .phoneNumber(phoneNumber)
-                .hashPassword(bCyPasswordEncoder.encode(password))
+                .firstName(dto.firstName())
+                .lastName(dto.lastName())
+                .username(dto.username())
+                .email(dto.email())
+                .phoneNumber(dto.phoneNumber())
+                .hashPassword(bCyPasswordEncoder.encode(dto.password()))
+                .roles(dto.roles())
+                .authorities(dto.authorities())
+                .accountNonExpired(dto.accountNonExpired())
+                .accountNonLocked(dto.accountNonLocked())
+                .credentialsNonExpired(dto.credentialsNonExpired())
+                .enabled(dto.enabled())
                 .build();
 
         return customerUserRepository.save(customerUser);
@@ -90,55 +87,51 @@ public class CustomerUserServiceImpl implements CustomerUserService {
 
     @Override
     @Transactional()
-    public CustomerUser updateUser(Long id, EnumSet<CustomerUserRole> roles, 
-                            EnumSet<CustomerUserAuthority> authorities, Boolean accountNonExpired, 
-                            Boolean accountNonLocked, Boolean credentialsNonExpired, Boolean enabled, 
-                            String firstName, String lastName, String username, String email, 
-                            String phoneNumber, String password, LocalDateTime lastLoginDate) {
+    public CustomerUser updateUser(Long id, CustomerUserUpdateDto dto) {
         CustomerUser customerUser = customerUserRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с id: " + id));
 
-        if(roles != null) {
-            customerUser.setRoles(roles);
+        if (dto.firstName() != null) {
+            customerUser.setFirstName(dto.firstName());
         }
-        if (authorities != null) {
-            customerUser.setAuthorities(authorities);
+        if (dto.lastName() != null) {
+            customerUser.setLastName(dto.lastName());
         }
-        if (accountNonExpired != null) {
-            customerUser.setAccountNonExpired(accountNonExpired.booleanValue());
+        if (dto.username() != null) {
+            existsByUsername(dto.username());
+            customerUser.setUsername(dto.username());;
         }
-        if (accountNonLocked != null) {
-            customerUser.setAccountNonLocked(accountNonLocked.booleanValue());
+        if (dto.email() != null) {
+            existsByEmail(dto.email());
+            customerUser.setEmail(dto.email());;
         }
-        if (credentialsNonExpired != null) {
-            customerUser.setCredentialsNonExpired(credentialsNonExpired.booleanValue());
+        if (dto.phoneNumber() != null) {
+            existsByPhoneNumber(dto.phoneNumber());
+            customerUser.setPhoneNumber(dto.phoneNumber());
         }
-        if (enabled != null) {
-            customerUser.setEnabled(enabled.booleanValue());
+        if (dto.password() != null) {
+            customerUser.setHashPassword(bCyPasswordEncoder.encode(dto.password()));
         }
-        if (firstName != null) {
-            customerUser.setFirstName(firstName);
+        if(dto.roles() != null) {
+            customerUser.setRoles(dto.roles());
         }
-        if (lastName != null) {
-            customerUser.setLastName(lastName);
+        if (dto.authorities() != null) {
+            customerUser.setAuthorities(dto.authorities());
         }
-        if (username != null) {
-            existsByUsername(username);
-            customerUser.setUsername(username);;
+        if (dto.accountNonExpired() != null) {
+            customerUser.setAccountNonExpired(dto.accountNonExpired().booleanValue());
         }
-        if (email != null) {
-            existsByEmail(email);
-            customerUser.setEmail(email);;
+        if (dto.accountNonLocked() != null) {
+            customerUser.setAccountNonLocked(dto.accountNonLocked().booleanValue());
         }
-        if (phoneNumber != null) {
-            existsByPhoneNumber(phoneNumber);
-            customerUser.setPhoneNumber(phoneNumber);
+        if (dto.credentialsNonExpired() != null) {
+            customerUser.setCredentialsNonExpired(dto.credentialsNonExpired().booleanValue());
         }
-        if (password != null) {
-            customerUser.setHashPassword(bCyPasswordEncoder.encode(password));
+        if (dto.enabled() != null) {
+            customerUser.setEnabled(dto.enabled().booleanValue());
         }
-        if (lastLoginDate != null) {
-            customerUser.setLastLoginDate(lastLoginDate);
+        if (dto.lastLoginDate() != null) {
+            customerUser.setLastLoginDate(dto.lastLoginDate());
         }
 
         return customerUserRepository.save(customerUser);
@@ -147,42 +140,49 @@ public class CustomerUserServiceImpl implements CustomerUserService {
     @Override
     @Transactional
     public void updateFirstName(Long id, String firstName) {
+        ensureUserExists(id);
         customerUserRepository.updateFirstName(id, firstName);
     }
 
     @Override
     @Transactional
     public void updateLastName(Long id, String lastName) {
+        ensureUserExists(id);
         customerUserRepository.updateLastName(id, lastName);
     }
 
     @Override
     @Transactional
     public void updatePhoneNumber(Long id, String phoneNumber) {
+        ensureUserExists(id);
         customerUserRepository.updatePhoneNumber(id, phoneNumber);
     }
 
     @Override
     @Transactional
     public void updateEmail(Long id, String email) {
+        ensureUserExists(id);
         customerUserRepository.updateEmail(id, email);
     }
 
     @Override
     @Transactional
     public void updateUsername(Long id, String username) {
+        ensureUserExists(id);
         customerUserRepository.updateUsername(id, username);
     }
 
     @Override
     @Transactional
     public void updateHashPassword(Long id, String hashPassword) {
+        ensureUserExists(id);
         customerUserRepository.updateHashPassword(id, hashPassword);
     }
 
     @Override
     @Transactional
     public void updateLastLoginDate(Long id, LocalDateTime lastLoginDate) {
+        ensureUserExists(id);
         customerUserRepository.updateLastLoginDate(id, lastLoginDate);
     }
 
@@ -209,36 +209,42 @@ public class CustomerUserServiceImpl implements CustomerUserService {
     @Override
     @Transactional
     public void updateAccountNonExpired(Long id, boolean accountNonExpired) {
+        ensureUserExists(id);
         customerUserRepository.updateAccountNonExpired(id, accountNonExpired);
     }
 
     @Override
     @Transactional
     public void updateAccountNonLocked(Long id, boolean accountNonLocked) {
+        ensureUserExists(id);
         customerUserRepository.updateAccountNonLocked(id, accountNonLocked);
     }
 
     @Override
     @Transactional
     public void updateCredentialsNonExpired(Long id, boolean credentialsNonExpired) {
+        ensureUserExists(id);
         customerUserRepository.updateCredentialsNonExpired(id, credentialsNonExpired);
     }
 
     @Override
     @Transactional
     public void updateEnabled(Long id, boolean enabled) {
+        ensureUserExists(id);
         customerUserRepository.updateEnabled(id, enabled);
     }
 
     @Override
     @Transactional
     public void addAuthority(Long userId, CustomerUserAuthority authority) {
+        ensureUserExists(userId);
         customerUserRepository.addAuthority(userId, authority.name());
     }
 
     @Override
     @Transactional
     public void addAuthorities(Long userId, EnumSet<CustomerUserAuthority> authorities) {
+        ensureUserExists(userId);
         for (CustomerUserAuthority authority : authorities) {
             customerUserRepository.addAuthority(userId, authority.name());
         }
@@ -247,12 +253,14 @@ public class CustomerUserServiceImpl implements CustomerUserService {
     @Override
     @Transactional
     public void removeAuthority(Long userId, CustomerUserAuthority authority) {
+        ensureUserExists(userId);
         customerUserRepository.removeAuthority(userId , authority.name());
     }
 
     @Override
     @Transactional
     public void removeAuthorities(Long userId, EnumSet<CustomerUserAuthority> authorities) {
+        ensureUserExists(userId);
         for (CustomerUserAuthority authority : authorities) {
             customerUserRepository.removeAuthority(userId, authority.name());
         }
@@ -261,12 +269,14 @@ public class CustomerUserServiceImpl implements CustomerUserService {
     @Override
     @Transactional
     public void addRole(Long userId, CustomerUserRole role) {
+        ensureUserExists(userId);
         customerUserRepository.addRole(userId, role.name());
     }
     
     @Override
     @Transactional
     public void addRoles(Long userId, EnumSet<CustomerUserRole> roles) {
+        ensureUserExists(userId);
         for (CustomerUserRole role : roles) {
             customerUserRepository.addRole(userId, role.name());
         }
@@ -275,12 +285,14 @@ public class CustomerUserServiceImpl implements CustomerUserService {
     @Override
     @Transactional
     public void removeRole(Long userId, CustomerUserRole role) {
+        ensureUserExists(userId);
         customerUserRepository.removeRole(userId, role.name());
     }
 
     @Override
     @Transactional
     public void removeRoles(Long userId, EnumSet<CustomerUserRole> roles) {
+        ensureUserExists(userId);
         for (CustomerUserRole role : roles) {
             customerUserRepository.removeRole(userId, role.name());
         }
@@ -292,21 +304,27 @@ public class CustomerUserServiceImpl implements CustomerUserService {
         customerUserRepository.deleteById(id);
     }
 
+    private void ensureUserExists(Long id) {
+        if (!customerUserRepository.existsById(id)) {
+            throw new UserNotFoundException("Пользователь не найден с id: " + id);
+        }
+    }
+
     private void existsByUsername(String username) {
         if (customerUserRepository.existsByUsername(username)) {
-            throw new AlreadyExistsException("Пользователь с username " + username + "уже существует");
+            throw new AlreadyExistsException("Пользователь с username " + username + " уже существует");
         }
     }
 
     private void existsByEmail(String email) {
         if (customerUserRepository.existsByEmail(email)) {
-            throw new AlreadyExistsException("Пользователь с email " + email + "уже существует");
+            throw new AlreadyExistsException("Пользователь с email " + email + " уже существует");
         }
     }
 
     private void existsByPhoneNumber(String phoneNumber) {
         if (customerUserRepository.existsByPhoneNumber(phoneNumber)) {
-            throw new AlreadyExistsException("Пользователь с phoneNumber " + phoneNumber + "уже существует");
+            throw new AlreadyExistsException("Пользователь с phoneNumber " + phoneNumber + " уже существует");
         }
     }
 }

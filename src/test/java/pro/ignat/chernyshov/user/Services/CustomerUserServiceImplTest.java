@@ -1,22 +1,12 @@
 package pro.ignat.chernyshov.user.Services;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.Arrays;
-import java.util.List;
-
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import edu.ignat.chernyshov.user.domain.entities.CustomerUser;
 import edu.ignat.chernyshov.user.repositories.CustomerUserRepository;
-import edu.ignat.chernyshov.user.services.CustomerUserServiceImpl;
+import edu.ignat.chernyshov.user.services.DefaultCustomerUserService;
 
 @ExtendWith(MockitoExtension.class)
 public class CustomerUserServiceImplTest {
@@ -25,7 +15,7 @@ public class CustomerUserServiceImplTest {
     private CustomerUserRepository customerUserRepository;
 
     @InjectMocks
-    private CustomerUserServiceImpl customerUserService;
+    private DefaultCustomerUserService customerUserService;
 
     // @Test
     // void testFindAll_ReturnsListOfCustomerUsers() {

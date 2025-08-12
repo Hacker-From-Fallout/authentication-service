@@ -9,17 +9,18 @@ import org.springframework.stereotype.Component;
 
 import edu.ignat.chernyshov.user.domain.authorities.CustomerUserAuthority;
 import edu.ignat.chernyshov.user.domain.authorities.CustomerUserRole;
+import edu.ignat.chernyshov.user.domain.dto.request.CustomerUserCreateDto;
 import edu.ignat.chernyshov.user.domain.entities.CustomerUser;
-import edu.ignat.chernyshov.user.services.CustomerUserServiceImpl;
+import edu.ignat.chernyshov.user.services.DefaultCustomerUserService;
 import lombok.RequiredArgsConstructor;
 
-// разобраться с ролями и их добавлением и обновлением
+// TODO Оптимезировать репозитории и перерсмотреть методы обновления полей roles и authorities
 
 @Component
 @RequiredArgsConstructor
 public class MyCommandLineRunner implements CommandLineRunner {
 
-    private final CustomerUserServiceImpl customerUserService;
+    private final DefaultCustomerUserService customerUserService;
 
     @Override
     public void run(String... args) throws Exception {
@@ -28,15 +29,14 @@ public class MyCommandLineRunner implements CommandLineRunner {
 
     public void runDemo() {
         // Создаем нового пользователя
-        CustomerUser newUser = customerUserService.createUser(
+        CustomerUser newUser = customerUserService.createUser(new CustomerUserCreateDto("John", "Doe", "johndoe", "john@example.com", "+1234567890", "password123",
                 EnumSet.of(CustomerUserRole.ROLE_CUSTOMER),
                 EnumSet.of(CustomerUserAuthority.CUSTOMER_READ_PRODUCT, CustomerUserAuthority.CUSTOMER_MAKE_AN_ORDER),
                 true, // accountNonExpired
                 true, // accountNonLocked
                 true, // credentialsNonExpired
-                true, // enabled
-                "John", "Doe", "johndoe", "john@example.com", "+1234567890", "password123"
-        );
+                true // enabled
+                ));
         System.out.println("Создан пользователь: " + newUser);
 
         Long userId = newUser.getId();

@@ -9,6 +9,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import edu.ignat.chernyshov.user.domain.authorities.CustomerUserAuthority;
 import edu.ignat.chernyshov.user.domain.authorities.CustomerUserRole;
 import jakarta.persistence.CollectionTable;
@@ -22,6 +24,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -30,6 +33,7 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @Setter
 @Entity
+@NoArgsConstructor
 @AllArgsConstructor
 @RequiredArgsConstructor
 @SuperBuilder
@@ -61,6 +65,11 @@ public class CustomerUser extends User implements UserDetails {
 
     @Column(name = "enabled")
     private boolean enabled;
+
+    @JsonIgnore
+    public Set<CustomerUserAuthority> getAuthoritiesSet() {
+        return authorities;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

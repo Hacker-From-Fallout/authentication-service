@@ -6,52 +6,44 @@ import java.util.List;
 
 import edu.ignat.chernyshov.user.domain.authorities.CustomerUserAuthority;
 import edu.ignat.chernyshov.user.domain.authorities.CustomerUserRole;
+import edu.ignat.chernyshov.user.domain.dto.request.CustomerUserCreateDto;
+import edu.ignat.chernyshov.user.domain.dto.request.CustomerUserUpdateDto;
 import edu.ignat.chernyshov.user.domain.entities.CustomerUser;
 
 public interface CustomerUserService {
-    List<CustomerUser> findAll();
+    public List<CustomerUser> findAll();
 
-    CustomerUser findById(Long id);
-    CustomerUser findByEmail(String email);
-    CustomerUser findByPhoneNumber(String phoneNumber);
-    CustomerUser findByUsername(String username);
+    public CustomerUser findById(Long id);
+    public CustomerUser findByEmail(String email);
+    public CustomerUser findByPhoneNumber(String phoneNumber);
+    public CustomerUser findByUsername(String username);
 
-    CustomerUser createUser(EnumSet<CustomerUserRole> roles, 
-                            EnumSet<CustomerUserAuthority> authorities,
-                            boolean accountNonExpired, boolean accountNonLocked, 
-                            boolean credentialsNonExpired, boolean enabled, String firstName,
-                            String lastName, String username, String email,
-                            String phoneNumber, String password);
+    public CustomerUser createUser(CustomerUserCreateDto dto);
+    public CustomerUser updateUser(Long id, CustomerUserUpdateDto dto);
 
-    CustomerUser updateUser(Long id, EnumSet<CustomerUserRole> roles, 
-                            EnumSet<CustomerUserAuthority> authorities, Boolean accountNonExpired, 
-                            Boolean accountNonLocked, Boolean credentialsNonExpired, Boolean enabled, 
-                            String firstName, String lastName, String username, String email, 
-                            String phoneNumber, String password, LocalDateTime lastLoginDate);
+    public void updateFirstName(Long id, String firstName);
+    public void updateLastName(Long id, String lastName);
+    public void updatePhoneNumber(Long id, String phoneNumber);
+    public void updateEmail(Long id, String email);
+    public void updateUsername(Long id, String username);
+    public void updateHashPassword(Long id, String hashPassword);
+    public void updateLastLoginDate(Long id, LocalDateTime lastLoginDate);
+    public void updateRoles(Long id, EnumSet<CustomerUserRole> roles);
+    public void updateAuthorities(Long id, EnumSet<CustomerUserAuthority> authorities);
+    public void updateAccountNonExpired(Long id, boolean accountNonExpired);
+    public void updateAccountNonLocked(Long id,boolean accountNonLocked);
+    public void updateCredentialsNonExpired(Long id, boolean credentialsNonExpired);
+    public void updateEnabled(Long id, boolean enabled);
 
-    void updateFirstName(Long id, String firstName);
-    void updateLastName(Long id, String lastName);
-    void updatePhoneNumber(Long id, String phoneNumber);
-    void updateEmail(Long id, String email);
-    void updateUsername(Long id, String username);
-    void updateHashPassword(Long id, String hashPassword);
-    void updateLastLoginDate(Long id, LocalDateTime lastLoginDate);
-    void updateRoles(Long id, EnumSet<CustomerUserRole> roles);
-    void updateAuthorities(Long id, EnumSet<CustomerUserAuthority> authorities);
-    void updateAccountNonExpired(Long id, boolean accountNonExpired);
-    void updateAccountNonLocked(Long id,boolean accountNonLocked);
-    void updateCredentialsNonExpired(Long id, boolean credentialsNonExpired);
-    void updateEnabled(Long id, boolean enabled);
+    public void addAuthority(Long userId, CustomerUserAuthority authority);
+    public void addAuthorities(Long userId, EnumSet<CustomerUserAuthority> authorities);
+    public void removeAuthority(Long userId, CustomerUserAuthority authority);
+    public void removeAuthorities(Long userId, EnumSet<CustomerUserAuthority> authorities);
 
-    void addAuthority(Long userId, CustomerUserAuthority authority);
-    void addAuthorities(Long userId, EnumSet<CustomerUserAuthority> authorities);
-    void removeAuthority(Long userId, CustomerUserAuthority authority);
-    void removeAuthorities(Long userId, EnumSet<CustomerUserAuthority> authorities);
+    public void addRole(Long userId, CustomerUserRole role);
+    public void addRoles(Long userId, EnumSet<CustomerUserRole> roles);
+    public void removeRole(Long userId, CustomerUserRole role);
+    public void removeRoles(Long userId, EnumSet<CustomerUserRole> roles);
 
-    void addRole(Long userId, CustomerUserRole role);
-    void addRoles(Long userId, EnumSet<CustomerUserRole> roles);
-    void removeRole(Long userId, CustomerUserRole role);
-    void removeRoles(Long userId, EnumSet<CustomerUserRole> roles);
-
-    void deleteById(Long id);
+    public void deleteById(Long id);
 }

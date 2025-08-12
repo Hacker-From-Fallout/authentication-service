@@ -49,23 +49,23 @@ public interface RootUserRepository extends JpaRepository<RootUser, Long> {
     void updateLastLoginDate(@Param("id") Long id, @Param("lastLoginDate") LocalDateTime lastLoginDate);
 
     @Modifying
-    @Query("UPDATE RootUser u SET u.accountNonExpired = :accountNonExpired WHERE u.id = :id")
+    @Query(value = "UPDATE RootUser u SET u.accountNonExpired = :accountNonExpired WHERE u.id = :id")
     void updateAccountNonExpired(@Param("id") Long id, @Param("accountNonExpired") boolean accountNonExpired);
 
     @Modifying
-    @Query("UPDATE RootUser u SET u.accountNonLocked = :accountNonLocked WHERE u.id = :id")
+    @Query(value = "UPDATE RootUser u SET u.accountNonLocked = :accountNonLocked WHERE u.id = :id")
     void updateAccountNonLocked(@Param("id") Long id, @Param("accountNonLocked") boolean accountNonLocked);
 
     @Modifying
-    @Query("UPDATE RootUser u SET u.credentialsNonExpired = :credentialsNonExpired WHERE u.id = :id")
+    @Query(value = "UPDATE RootUser u SET u.credentialsNonExpired = :credentialsNonExpired WHERE u.id = :id")
     void updateCredentialsNonExpired(@Param("id") Long id, @Param("credentialsNonExpired") boolean credentialsNonExpired);
 
     @Modifying
-    @Query("UPDATE RootUser u SET u.enabled = :enabled WHERE u.id = :id")
+    @Query(value = "UPDATE RootUser u SET u.enabled = :enabled WHERE u.id = :id")
     void updateEnabled(@Param("id") Long id, @Param("enabled") boolean valenabledue);
 
     @Modifying
-    @Query(value = "INSERT INTO root_user_authorities (user_id, authorities) VALUES (:userId, :authority)", nativeQuery = true)
+    @Query(value = "MERGE INTO root_user_authorities (user_id, authorities) KEY (user_id, authorities) VALUES (:userId, :authority)", nativeQuery = true)
     void addAuthority(@Param("userId") Long userId, @Param("authority") String authority);
 
     @Modifying
@@ -73,7 +73,7 @@ public interface RootUserRepository extends JpaRepository<RootUser, Long> {
     void removeAuthority(@Param("userId") Long userId, @Param("authority") String authority);
 
     @Modifying
-    @Query(value = "INSERT INTO root_user_roles (user_id, roles) VALUES (:userId, :role)", nativeQuery = true)
+    @Query(value = "MERGE INTO root_user_roles (user_id, roles) KEY (user_id, roles) VALUES (:userId, :role)", nativeQuery = true)
     void addRole(@Param("userId") Long userId, @Param("role") String role);
 
     @Modifying
@@ -82,6 +82,7 @@ public interface RootUserRepository extends JpaRepository<RootUser, Long> {
 
     void deleteById(@Param("id") Long id);
 
+    boolean existsById(Long Id);
     boolean existsByEmail(String email);
     boolean existsByPhoneNumber(String phoneNumber);
     boolean existsByUsername(String username);
