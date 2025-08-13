@@ -15,8 +15,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
                 .anyRequest().permitAll())
-                .csrf(CsrfConfigurer::disable)
-                .headers(headers -> headers.frameOptions().disable()); 
+                .csrf(CsrfConfigurer::disable);
 
         return http.build();
     } 

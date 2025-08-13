@@ -24,7 +24,7 @@ public record RootUserUpdateDto(
     @Email(message = "Email should be valid")
     String email,
 
-    @Pattern(regexp = "^\\+?[0-9\\-\\s]{7,15}$", message = "Phone number is invalid")
+    @Pattern(regexp = "^\\+[1-9][0-9]{7,14}$", message = "Phone number must be in international format with country code")
     String phoneNumber,
 
     @Size(min = 8, message = "Password must be at least 8 characters")

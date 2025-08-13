@@ -2,7 +2,6 @@ package edu.ignat.chernyshov.user;
 
 import java.time.LocalDateTime;
 import java.util.EnumSet;
-import java.util.List;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -14,17 +13,18 @@ import edu.ignat.chernyshov.user.domain.entities.CustomerUser;
 import edu.ignat.chernyshov.user.services.DefaultCustomerUserService;
 import lombok.RequiredArgsConstructor;
 
-// TODO Оптимезировать репозитории и перерсмотреть методы обновления полей roles и authorities
-
 @Component
 @RequiredArgsConstructor
 public class MyCommandLineRunner implements CommandLineRunner {
+
+    //private final CustomerUserRepository customerUserRepository;
 
     private final DefaultCustomerUserService customerUserService;
 
     @Override
     public void run(String... args) throws Exception {
-        runDemo();
+        // runDemo();
+        // customerUserRepository.deleteAll();
     }
 
     public void runDemo() {
@@ -87,6 +87,10 @@ public class MyCommandLineRunner implements CommandLineRunner {
         customerUserService.updateLastLoginDate(userId, now);
         System.out.println("Обновлена дата последнего входа: " + customerUserService.findById(userId).getLastLoginDate());
 
+        // замена всех ролей и полномочий
+        customerUserService.updateRoles(userId, EnumSet.of(CustomerUserRole.ROLE_CUSTOMER_EXPERIMENTAL, CustomerUserRole.ROLE_CUSTOMER));
+        customerUserService.updateAuthorities(userId, EnumSet.of(CustomerUserAuthority.CUSTOMER_ADD_TO_SHOPPING_CART, CustomerUserAuthority.CUSTOMER_CREATE_FAVORITE_PRODUCT, CustomerUserAuthority.CUSTOMER_CREATE_FAVORITE_PRODUCT));
+
         // Добавление роли и полномочий
         customerUserService.addRole(userId, CustomerUserRole.ROLE_CUSTOMER_EXPERIMENTAL);
         System.out.println("Добавлена роль ROLE_CUSTOMER_EXPERIMENTAL");
@@ -127,11 +131,6 @@ public class MyCommandLineRunner implements CommandLineRunner {
 
         customerUserService.updateEnabled(userId, false);
         System.out.println("Обновлено enabled: false");
-
-        // Получение списка пользователей
-        List<CustomerUser> list = customerUserService.findAll();
-        System.out.println("-------------------------------------------------");
-        System.out.println("Получение списка пользователей: " + list.toString());
 
         // Удаление пользователя по ID
         customerUserService.deleteById(userId);

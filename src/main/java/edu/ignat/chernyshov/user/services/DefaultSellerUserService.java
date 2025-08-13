@@ -2,8 +2,11 @@ package edu.ignat.chernyshov.user.services;
 
 import java.time.LocalDateTime;
 import java.util.EnumSet;
-import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,11 +14,13 @@ import org.springframework.transaction.annotation.Transactional;
 import edu.ignat.chernyshov.user.domain.authorities.SellerUserAuthority;
 import edu.ignat.chernyshov.user.domain.authorities.SellerUserRole;
 import edu.ignat.chernyshov.user.domain.dto.request.SellerUserCreateDto;
+import edu.ignat.chernyshov.user.domain.dto.request.SellerUserFilterDto;
 import edu.ignat.chernyshov.user.domain.dto.request.SellerUserUpdateDto;
 import edu.ignat.chernyshov.user.domain.entities.SellerUser;
 import edu.ignat.chernyshov.user.exception.exceptions.AlreadyExistsException;
 import edu.ignat.chernyshov.user.exception.exceptions.UserNotFoundException;
 import edu.ignat.chernyshov.user.repositories.SellerUserRepository;
+import edu.ignat.chernyshov.user.repositories.specifications.SellerUserSpecifications;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -27,8 +32,27 @@ public class DefaultSellerUserService implements SellerUserService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<SellerUser> findAll() {
-        return sellerUserRepository.findAll();
+    public Page<SellerUser> findByFilters(SellerUserFilterDto filters, int page, int size) {
+        Specification<SellerUser> specification = (root, query, criteriaBuilder) -> criteriaBuilder.conjunction();
+
+        if (filters.firstName() != null && !filters.firstName().isEmpty()) {
+            specification = specification.and(SellerUserSpecifications.hasFirstName(filters.firstName()));
+        }
+        if (filters.lastName() != null && !filters.lastName().isEmpty()) {
+            specification = specification.and(SellerUserSpecifications.hasLastName(filters.lastName()));
+        }
+        if (filters.username() != null && !filters.username().isEmpty()) {
+            specification = specification.and(SellerUserSpecifications.hasUsername(filters.username()));
+        }
+        if (filters.email() != null && !filters.email().isEmpty()) {
+            specification = specification.and(SellerUserSpecifications.hasEmail(filters.email()));
+        }
+        if (filters.phoneNumber() != null && !filters.phoneNumber().isEmpty()) {
+            specification = specification.and(SellerUserSpecifications.hasPhoneNumber(filters.phoneNumber()));
+        }
+
+        Pageable pageable = PageRequest.of(page, size);
+        return sellerUserRepository.findAll(specification, pageable);
     }
 
     @Override
@@ -36,6 +60,14 @@ public class DefaultSellerUserService implements SellerUserService {
     public SellerUser findById(Long id) {
         return sellerUserRepository.findById(id)
             .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с id: " + id));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public SellerUser findByUsername(String username) {
+        return sellerUserRepository.findByUsername(username)
+            .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с username: " + username));
+    
     }
 
     @Override
@@ -50,14 +82,6 @@ public class DefaultSellerUserService implements SellerUserService {
     public SellerUser findByPhoneNumber(String phoneNumber) {
         return sellerUserRepository.findByPhoneNumber(phoneNumber)
             .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с phoneNumber: " + phoneNumber));
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public SellerUser findByUsername(String username) {
-        return sellerUserRepository.findByUsername(username)
-            .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с username: " + username));
-    
     }
 
     @Override
@@ -154,9 +178,9 @@ public class DefaultSellerUserService implements SellerUserService {
 
     @Override
     @Transactional
-    public void updatePhoneNumber(Long id, String phoneNumber) {
+    public void updateUsername(Long id, String username) {
         ensureUserExists(id);
-        sellerUserRepository.updatePhoneNumber(id, phoneNumber);
+        sellerUserRepository.updateUsername(id, username);
     }
 
     @Override
@@ -168,9 +192,9 @@ public class DefaultSellerUserService implements SellerUserService {
 
     @Override
     @Transactional
-    public void updateUsername(Long id, String username) {
+    public void updatePhoneNumber(Long id, String phoneNumber) {
         ensureUserExists(id);
-        sellerUserRepository.updateUsername(id, username);
+        sellerUserRepository.updatePhoneNumber(id, phoneNumber);
     }
 
     @Override
@@ -185,26 +209,6 @@ public class DefaultSellerUserService implements SellerUserService {
     public void updateLastLoginDate(Long id, LocalDateTime lastLoginDate) {
         ensureUserExists(id);
         sellerUserRepository.updateLastLoginDate(id, lastLoginDate);
-    }
-
-    @Override
-    @Transactional
-    public void updateRoles(Long id, EnumSet<SellerUserRole> roles) {
-        SellerUser sellerUser = sellerUserRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с id: " + id));
-
-        sellerUser.setRoles(roles);
-        sellerUserRepository.save(sellerUser);
-    }
-
-    @Override
-    @Transactional
-    public void updateAuthorities(Long id, EnumSet<SellerUserAuthority> authorities) {
-        SellerUser sellerUser = sellerUserRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с id: " + id));
-        
-        sellerUser.setAuthorities(authorities);
-        sellerUserRepository.save(sellerUser);
     }
 
     @Override
@@ -233,6 +237,49 @@ public class DefaultSellerUserService implements SellerUserService {
     public void updateEnabled(Long id, boolean enabled) {
         ensureUserExists(id);
         sellerUserRepository.updateEnabled(id, enabled);
+    }
+
+    @Override
+    @Transactional
+    public void addRole(Long userId, SellerUserRole role) {
+        ensureUserExists(userId);
+        sellerUserRepository.addRole(userId, role.name());
+    }
+    
+    @Override
+    @Transactional
+    public void addRoles(Long userId, EnumSet<SellerUserRole> roles) {
+        ensureUserExists(userId);
+        for (SellerUserRole role : roles) {
+            sellerUserRepository.addRole(userId, role.name());
+        }
+    }
+
+    @Override
+    @Transactional
+    public void removeRole(Long userId, SellerUserRole role) {
+        ensureUserExists(userId);
+        sellerUserRepository.removeRole(userId, role.name());
+    }
+
+    @Override
+    @Transactional
+    public void removeRoles(Long userId, EnumSet<SellerUserRole> roles) {
+        ensureUserExists(userId);
+        for (SellerUserRole role : roles) {
+            sellerUserRepository.removeRole(userId, role.name());
+        }
+    }
+
+    @Override
+    @Transactional
+    public void updateRoles(Long userId, EnumSet<SellerUserRole> roles) {
+        ensureUserExists(userId);
+
+        sellerUserRepository.deleteAllRoles(userId);
+        for (SellerUserRole role : roles) {
+            sellerUserRepository.addRole(userId, role.name());
+        }
     }
 
     @Override
@@ -266,36 +313,15 @@ public class DefaultSellerUserService implements SellerUserService {
             sellerUserRepository.removeAuthority(userId, authority.name());
         }
     }
+        
+    @Override
+    @Transactional
+    public void updateAuthorities(Long userId, EnumSet<SellerUserAuthority> authorities) {
+        ensureUserExists(userId);
 
-    @Override
-    @Transactional
-    public void addRole(Long userId, SellerUserRole role) {
-        ensureUserExists(userId);
-        sellerUserRepository.addRole(userId, role.name());
-    }
-    
-    @Override
-    @Transactional
-    public void addRoles(Long userId, EnumSet<SellerUserRole> roles) {
-        ensureUserExists(userId);
-        for (SellerUserRole role : roles) {
-            sellerUserRepository.addRole(userId, role.name());
-        }
-    }
-
-    @Override
-    @Transactional
-    public void removeRole(Long userId, SellerUserRole role) {
-        ensureUserExists(userId);
-        sellerUserRepository.removeRole(userId, role.name());
-    }
-
-    @Override
-    @Transactional
-    public void removeRoles(Long userId, EnumSet<SellerUserRole> roles) {
-        ensureUserExists(userId);
-        for (SellerUserRole role : roles) {
-            sellerUserRepository.removeRole(userId, role.name());
+        sellerUserRepository.deleteAllAuthorities(userId);
+        for (SellerUserAuthority authority : authorities) {
+            sellerUserRepository.addAuthority(userId, authority.name());
         }
     }
 

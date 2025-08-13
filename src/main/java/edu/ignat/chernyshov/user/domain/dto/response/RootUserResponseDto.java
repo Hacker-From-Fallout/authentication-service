@@ -9,10 +9,11 @@ import edu.ignat.chernyshov.user.domain.entities.RootUser;
 
 public record RootUserResponseDto(
     Long id,
-    String username,
-    String email,
     String firstName,
     String lastName,
+    String username,
+    String email,
+    String phoneNumber,
     EnumSet<RootUserRole> roles,
     EnumSet<RootUserAuthority> authorities,
     Boolean accountNonExpired,
@@ -25,12 +26,13 @@ public record RootUserResponseDto(
     public static RootUserResponseDto from(RootUser rootUser) {
         return new RootUserResponseDto(
             rootUser.getId(),
-            rootUser.getUsername(),
-            rootUser.getEmail(),
             rootUser.getFirstName(),
             rootUser.getLastName(),
-            EnumSet.copyOf(rootUser.getRoles()),
-            EnumSet.copyOf(rootUser.getAuthoritiesSet()),
+            rootUser.getUsername(),
+            rootUser.getEmail(),
+            rootUser.getPhoneNumber(),
+            rootUser.getRoles().isEmpty() ? EnumSet.noneOf(RootUserRole.class) : EnumSet.copyOf(rootUser.getRoles()),
+            rootUser.getAuthorities().isEmpty() ? EnumSet.noneOf(RootUserAuthority.class) : EnumSet.copyOf(rootUser.getAuthoritiesSet()),
             rootUser.isAccountNonExpired(),
             rootUser.isAccountNonLocked(),
             rootUser.isCredentialsNonExpired(),

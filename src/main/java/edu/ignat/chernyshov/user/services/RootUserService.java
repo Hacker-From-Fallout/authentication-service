@@ -2,48 +2,52 @@ package edu.ignat.chernyshov.user.services;
 
 import java.time.LocalDateTime;
 import java.util.EnumSet;
-import java.util.List;
+
+import org.springframework.data.domain.Page;
 
 import edu.ignat.chernyshov.user.domain.authorities.RootUserAuthority;
 import edu.ignat.chernyshov.user.domain.authorities.RootUserRole;
 import edu.ignat.chernyshov.user.domain.dto.request.RootUserCreateDto;
+import edu.ignat.chernyshov.user.domain.dto.request.RootUserFilterDto;
 import edu.ignat.chernyshov.user.domain.dto.request.RootUserUpdateDto;
 import edu.ignat.chernyshov.user.domain.entities.RootUser;
 
 public interface RootUserService {
-    public List<RootUser> findAll();
+    Page<RootUser> findByFilters(RootUserFilterDto filters, int page, int size);
+    RootUser findById(Long id);
+    RootUser findByUsername(String username);
+    RootUser findByEmail(String email);
+    RootUser findByPhoneNumber(String phoneNumber);
+    
+    RootUser createUser(RootUserCreateDto dto);
+    RootUser updateUser(Long id, RootUserUpdateDto dto);
 
-    public RootUser findById(Long id);
-    public RootUser findByEmail(String email);
-    public RootUser findByPhoneNumber(String phoneNumber);
-    public RootUser findByUsername(String username);
+    void updateFirstName(Long id, String firstName);
+    void updateLastName(Long id, String lastName);
+    void updateUsername(Long id, String username);
+    void updateEmail(Long id, String email);
+    void updatePhoneNumber(Long id, String phoneNumber);
+    void updateHashPassword(Long id, String hashPassword);
+    void updateLastLoginDate(Long id, LocalDateTime lastLoginDate);
 
-    public RootUser createUser(RootUserCreateDto dto);
-    public RootUser updateUser(Long id, RootUserUpdateDto dto);
+    void updateAccountNonExpired(Long id, boolean accountNonExpired);
+    void updateAccountNonLocked(Long id, boolean accountNonLocked);
+    void updateCredentialsNonExpired(Long id, boolean credentialsNonExpired);
+    void updateEnabled(Long id, boolean enabled);
 
-    public void updateFirstName(Long id, String firstName);
-    public void updateLastName(Long id, String lastName);
-    public void updatePhoneNumber(Long id, String phoneNumber);
-    public void updateEmail(Long id, String email);
-    public void updateUsername(Long id, String username);
-    public void updateHashPassword(Long id, String hashPassword);
-    public void updateLastLoginDate(Long id, LocalDateTime lastLoginDate);
-    public void updateRoles(Long id, EnumSet<RootUserRole> roles);
-    public void updateAuthorities(Long id, EnumSet<RootUserAuthority> authorities);
-    public void updateAccountNonExpired(Long id, boolean accountNonExpired);
-    public void updateAccountNonLocked(Long id,boolean accountNonLocked);
-    public void updateCredentialsNonExpired(Long id, boolean credentialsNonExpired);
-    public void updateEnabled(Long id, boolean enabled);
+    void addRole(Long userId, RootUserRole role);
+    void addRoles(Long userId, EnumSet<RootUserRole> roles);
+    void removeRole(Long userId, RootUserRole role);
+    void removeRoles(Long userId, EnumSet<RootUserRole> roles);
 
-    public void addAuthority(Long userId, RootUserAuthority authority);
-    public void addAuthorities(Long userId, EnumSet<RootUserAuthority> authorities);
-    public void removeAuthority(Long userId, RootUserAuthority authority);
-    public void removeAuthorities(Long userId, EnumSet<RootUserAuthority> authorities);
+    void updateRoles(Long userId, EnumSet<RootUserRole> roles);
 
-    public void addRole(Long userId, RootUserRole role);
-    public void addRoles(Long userId, EnumSet<RootUserRole> roles);
-    public void removeRole(Long userId, RootUserRole role);
-    public void removeRoles(Long userId, EnumSet<RootUserRole> roles);
+    void addAuthority(Long userId, RootUserAuthority authority);
+    void addAuthorities(Long userId, EnumSet<RootUserAuthority> authorities);
+    void removeAuthority(Long userId, RootUserAuthority authority);
+    void removeAuthorities(Long userId, EnumSet<RootUserAuthority> authorities);
 
-    public void deleteById(Long id);
+    void updateAuthorities(Long userId, EnumSet<RootUserAuthority> authorities);
+
+    void deleteById(Long id);
 }

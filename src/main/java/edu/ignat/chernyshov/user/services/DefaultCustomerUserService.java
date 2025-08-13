@@ -2,8 +2,11 @@ package edu.ignat.chernyshov.user.services;
 
 import java.time.LocalDateTime;
 import java.util.EnumSet;
-import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,11 +14,13 @@ import org.springframework.transaction.annotation.Transactional;
 import edu.ignat.chernyshov.user.domain.authorities.CustomerUserAuthority;
 import edu.ignat.chernyshov.user.domain.authorities.CustomerUserRole;
 import edu.ignat.chernyshov.user.domain.dto.request.CustomerUserCreateDto;
+import edu.ignat.chernyshov.user.domain.dto.request.CustomerUserFilterDto;
 import edu.ignat.chernyshov.user.domain.dto.request.CustomerUserUpdateDto;
 import edu.ignat.chernyshov.user.domain.entities.CustomerUser;
 import edu.ignat.chernyshov.user.exception.exceptions.AlreadyExistsException;
 import edu.ignat.chernyshov.user.exception.exceptions.UserNotFoundException;
 import edu.ignat.chernyshov.user.repositories.CustomerUserRepository;
+import edu.ignat.chernyshov.user.repositories.specifications.CustomerUserSpecifications;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -27,8 +32,27 @@ public class DefaultCustomerUserService implements CustomerUserService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<CustomerUser> findAll() {
-        return customerUserRepository.findAll();
+    public Page<CustomerUser> findByFilters(CustomerUserFilterDto filters, int page, int size) {
+        Specification<CustomerUser> specification = (root, query, criteriaBuilder) -> criteriaBuilder.conjunction();
+
+        if (filters.firstName() != null && !filters.firstName().isEmpty()) {
+            specification = specification.and(CustomerUserSpecifications.hasFirstName(filters.firstName()));
+        }
+        if (filters.lastName() != null && !filters.lastName().isEmpty()) {
+            specification = specification.and(CustomerUserSpecifications.hasLastName(filters.lastName()));
+        }
+        if (filters.username() != null && !filters.username().isEmpty()) {
+            specification = specification.and(CustomerUserSpecifications.hasUsername(filters.username()));
+        }
+        if (filters.email() != null && !filters.email().isEmpty()) {
+            specification = specification.and(CustomerUserSpecifications.hasEmail(filters.email()));
+        }
+        if (filters.phoneNumber() != null && !filters.phoneNumber().isEmpty()) {
+            specification = specification.and(CustomerUserSpecifications.hasPhoneNumber(filters.phoneNumber()));
+        }
+
+        Pageable pageable = PageRequest.of(page, size);
+        return customerUserRepository.findAll(specification, pageable);
     }
 
     @Override
@@ -36,6 +60,14 @@ public class DefaultCustomerUserService implements CustomerUserService {
     public CustomerUser findById(Long id) {
         return customerUserRepository.findById(id)
             .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с id: " + id));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public CustomerUser findByUsername(String username) {
+        return customerUserRepository.findByUsername(username)
+            .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с username: " + username));
+    
     }
 
     @Override
@@ -50,14 +82,6 @@ public class DefaultCustomerUserService implements CustomerUserService {
     public CustomerUser findByPhoneNumber(String phoneNumber) {
         return customerUserRepository.findByPhoneNumber(phoneNumber)
             .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с phoneNumber: " + phoneNumber));
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public CustomerUser findByUsername(String username) {
-        return customerUserRepository.findByUsername(username)
-            .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с username: " + username));
-    
     }
 
     @Override
@@ -150,12 +174,11 @@ public class DefaultCustomerUserService implements CustomerUserService {
         ensureUserExists(id);
         customerUserRepository.updateLastName(id, lastName);
     }
-
     @Override
     @Transactional
-    public void updatePhoneNumber(Long id, String phoneNumber) {
+    public void updateUsername(Long id, String username) {
         ensureUserExists(id);
-        customerUserRepository.updatePhoneNumber(id, phoneNumber);
+        customerUserRepository.updateUsername(id, username);
     }
 
     @Override
@@ -167,9 +190,9 @@ public class DefaultCustomerUserService implements CustomerUserService {
 
     @Override
     @Transactional
-    public void updateUsername(Long id, String username) {
+    public void updatePhoneNumber(Long id, String phoneNumber) {
         ensureUserExists(id);
-        customerUserRepository.updateUsername(id, username);
+        customerUserRepository.updatePhoneNumber(id, phoneNumber);
     }
 
     @Override
@@ -184,26 +207,6 @@ public class DefaultCustomerUserService implements CustomerUserService {
     public void updateLastLoginDate(Long id, LocalDateTime lastLoginDate) {
         ensureUserExists(id);
         customerUserRepository.updateLastLoginDate(id, lastLoginDate);
-    }
-
-    @Override
-    @Transactional
-    public void updateRoles(Long id, EnumSet<CustomerUserRole> roles) {
-        CustomerUser customerUser = customerUserRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с id: " + id));
-
-        customerUser.setRoles(roles);
-        customerUserRepository.save(customerUser);
-    }
-
-    @Override
-    @Transactional
-    public void updateAuthorities(Long id, EnumSet<CustomerUserAuthority> authorities) {
-        CustomerUser customerUser = customerUserRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с id: " + id));
-        
-        customerUser.setAuthorities(authorities);
-        customerUserRepository.save(customerUser);
     }
 
     @Override
@@ -232,6 +235,49 @@ public class DefaultCustomerUserService implements CustomerUserService {
     public void updateEnabled(Long id, boolean enabled) {
         ensureUserExists(id);
         customerUserRepository.updateEnabled(id, enabled);
+    }
+
+    @Override
+    @Transactional
+    public void addRole(Long userId, CustomerUserRole role) {
+        ensureUserExists(userId);
+        customerUserRepository.addRole(userId, role.name());
+    }
+    
+    @Override
+    @Transactional
+    public void addRoles(Long userId, EnumSet<CustomerUserRole> roles) {
+        ensureUserExists(userId);
+        for (CustomerUserRole role : roles) {
+            customerUserRepository.addRole(userId, role.name());
+        }
+    }
+
+    @Override
+    @Transactional
+    public void removeRole(Long userId, CustomerUserRole role) {
+        ensureUserExists(userId);
+        customerUserRepository.removeRole(userId, role.name());
+    }
+
+    @Override
+    @Transactional
+    public void removeRoles(Long userId, EnumSet<CustomerUserRole> roles) {
+        ensureUserExists(userId);
+        for (CustomerUserRole role : roles) {
+            customerUserRepository.removeRole(userId, role.name());
+        }
+    }
+
+    @Override
+    @Transactional
+    public void updateRoles(Long userId, EnumSet<CustomerUserRole> roles) {
+        ensureUserExists(userId);
+        customerUserRepository.deleteAllRoles(userId);
+
+        for (CustomerUserRole role : roles) {
+            customerUserRepository.addRole(userId, role.name());
+        }
     }
 
     @Override
@@ -268,33 +314,12 @@ public class DefaultCustomerUserService implements CustomerUserService {
 
     @Override
     @Transactional
-    public void addRole(Long userId, CustomerUserRole role) {
+    public void updateAuthorities(Long userId, EnumSet<CustomerUserAuthority> authorities) {
         ensureUserExists(userId);
-        customerUserRepository.addRole(userId, role.name());
-    }
-    
-    @Override
-    @Transactional
-    public void addRoles(Long userId, EnumSet<CustomerUserRole> roles) {
-        ensureUserExists(userId);
-        for (CustomerUserRole role : roles) {
-            customerUserRepository.addRole(userId, role.name());
-        }
-    }
+        customerUserRepository.deleteAllRoles(userId);
 
-    @Override
-    @Transactional
-    public void removeRole(Long userId, CustomerUserRole role) {
-        ensureUserExists(userId);
-        customerUserRepository.removeRole(userId, role.name());
-    }
-
-    @Override
-    @Transactional
-    public void removeRoles(Long userId, EnumSet<CustomerUserRole> roles) {
-        ensureUserExists(userId);
-        for (CustomerUserRole role : roles) {
-            customerUserRepository.removeRole(userId, role.name());
+        for (CustomerUserAuthority authority : authorities) {
+            customerUserRepository.addAuthority(userId, authority.name());
         }
     }
 

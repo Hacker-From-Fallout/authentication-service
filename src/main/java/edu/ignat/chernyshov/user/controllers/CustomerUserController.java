@@ -1,17 +1,17 @@
 package edu.ignat.chernyshov.user.controllers;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import edu.ignat.chernyshov.user.domain.dto.request.AccountNonExpiredDto;
@@ -20,6 +20,7 @@ import edu.ignat.chernyshov.user.domain.dto.request.CredentialsNonExpiredDto;
 import edu.ignat.chernyshov.user.domain.dto.request.CustomerUserAuthoritiesDto;
 import edu.ignat.chernyshov.user.domain.dto.request.CustomerUserAuthorityDto;
 import edu.ignat.chernyshov.user.domain.dto.request.CustomerUserCreateDto;
+import edu.ignat.chernyshov.user.domain.dto.request.CustomerUserFilterDto;
 import edu.ignat.chernyshov.user.domain.dto.request.CustomerUserRoleDto;
 import edu.ignat.chernyshov.user.domain.dto.request.CustomerUserRolesDto;
 import edu.ignat.chernyshov.user.domain.dto.request.CustomerUserUpdateDto;
@@ -40,54 +41,53 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/customer-user/")
+@RequestMapping("/api/customer-users/")
 public class CustomerUserController {
 
     private final CustomerUserService customerUserService;
 
-    @GetMapping("/users")
-    public ResponseEntity<List<CustomerUserResponseDto>> getUsers() {
-        List<CustomerUser> users = customerUserService.findAll();
-        
-        List<CustomerUserResponseDto> dtos = users.stream()
-                .map(CustomerUserResponseDto::from)
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(dtos);
+    @GetMapping
+    public ResponseEntity<Page<CustomerUserResponseDto>> getAllUsers(
+            @ModelAttribute CustomerUserFilterDto filters,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<CustomerUser> pageResult = customerUserService.findByFilters(filters, page, size);
+        Page<CustomerUserResponseDto> dtosPage = pageResult.map(CustomerUserResponseDto::from);
+        return ResponseEntity.ok(dtosPage);
     }
 
-    @GetMapping("/by-id/{userId}")
-    public ResponseEntity<?> getUserById(@PathVariable("userId") Long userId) {
-        CustomerUser customerUser = customerUserService.findById(userId);
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getUserById(@PathVariable Long id) {
+        CustomerUser customerUser = customerUserService.findById(id);
         return ResponseEntity.status(HttpStatus.OK).body(
                 CustomerUserResponseDto.from(customerUser));
     }
 
-    @GetMapping("/by-username/{username}")
-    public ResponseEntity<?> getUserByUsername(@PathVariable("username") String username) {
+    @GetMapping("/username/{username}")
+    public ResponseEntity<?> getUserByUsername(@PathVariable String username) {
         CustomerUser customerUser = customerUserService.findByUsername(username);
         return ResponseEntity.status(HttpStatus.OK).body(
                 CustomerUserResponseDto.from(customerUser));
     }
 
-    @GetMapping("/by-email/{email}")
-    public ResponseEntity<?> getUserByEmail(@PathVariable("email") String email) {
+    @GetMapping("/email/{email}")
+    public ResponseEntity<?> getUserByEmail(@PathVariable String email) {
         CustomerUser customerUser = customerUserService.findByEmail(email);
         return ResponseEntity.status(HttpStatus.OK).body(
                 CustomerUserResponseDto.from(customerUser));
     }
 
-    @GetMapping("/by-phone/{phoneNumber}")
-    public ResponseEntity<?> getUserByPhoneNumber(@PathVariable("phoneNumber") String phoneNumber) {
+    @GetMapping("/phone/{phoneNumber}")
+    public ResponseEntity<?> getUserByPhoneNumber(@PathVariable String phoneNumber) {
         CustomerUser customerUser = customerUserService.findByPhoneNumber(phoneNumber);
         return ResponseEntity.status(HttpStatus.OK).body(
                 CustomerUserResponseDto.from(customerUser));
     }
 
-    @PostMapping()
+    @PostMapping
     public ResponseEntity<?> createUser(@Valid @RequestBody CustomerUserCreateDto dto, 
                             BindingResult bindingResult) throws BindException {
         if (bindingResult.hasErrors()) {
@@ -104,8 +104,8 @@ public class CustomerUserController {
                 CustomerUserResponseDto.from(customerUser));
     }
 
-    @PutMapping("/{userId}")
-    public ResponseEntity<?> updateUser(@PathVariable Long userId, @Valid @RequestBody CustomerUserUpdateDto dto, 
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @Valid @RequestBody CustomerUserUpdateDto dto, 
                             BindingResult bindingResult) throws BindException {
         if (bindingResult.hasErrors()) {
             if (bindingResult instanceof BindException error) {
@@ -115,139 +115,139 @@ public class CustomerUserController {
             }
         }
 
-        CustomerUser customerUser = customerUserService.updateUser(userId, dto);
+        CustomerUser customerUser = customerUserService.updateUser(id, dto);
         
         return ResponseEntity.status(HttpStatus.OK).body(
                 CustomerUserResponseDto.from(customerUser));
     }
 
-    @PatchMapping("/first-name/{userId}")
-    public ResponseEntity<?> updateFirstName(@PathVariable Long userId, @Valid @RequestBody FirstNameDto dto) {
-        customerUserService.updateFirstName(userId, dto.firstName());
+    @PatchMapping("/{id}/first-name")
+    public ResponseEntity<?> updateFirstName(@PathVariable Long id, @Valid @RequestBody FirstNameDto dto) {
+        customerUserService.updateFirstName(id, dto.firstName());
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/last-name/{userId}")
-    public ResponseEntity<?> updateLastName(@PathVariable Long userId, @Valid @RequestBody LastNameDto dto) {
-        customerUserService.updateLastName(userId, dto.lastName());
+    @PatchMapping("/{id}/last-name")
+    public ResponseEntity<?> updateLastName(@PathVariable Long id, @Valid @RequestBody LastNameDto dto) {
+        customerUserService.updateLastName(id, dto.lastName());
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/username/{userId}")
-    public ResponseEntity<?> updateUsername(@PathVariable Long userId, @Valid @RequestBody UsernameDto dto) {
-        customerUserService.updateUsername(userId, dto.username());
+    @PatchMapping("/{id}/username")
+    public ResponseEntity<?> updateUsername(@PathVariable Long id, @Valid @RequestBody UsernameDto dto) {
+        customerUserService.updateUsername(id, dto.username());
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/email/{userId}")
-    public ResponseEntity<?> updateEmail(@PathVariable Long userId, @Valid @RequestBody EmailDto dto) {
-        customerUserService.updateEmail(userId, dto.email());
+    @PatchMapping("/{id}/email")
+    public ResponseEntity<?> updateEmail(@PathVariable Long id, @Valid @RequestBody EmailDto dto) {
+        customerUserService.updateEmail(id, dto.email());
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/phone-number/{userId}")
-    public ResponseEntity<?> updatePhoneNumber(@PathVariable Long userId, @Valid @RequestBody PhoneNumberDto dto) {
-        customerUserService.updatePhoneNumber(userId, dto.phoneNumber());
+    @PatchMapping("/{id}/phone-number")
+    public ResponseEntity<?> updatePhoneNumber(@PathVariable Long id, @Valid @RequestBody PhoneNumberDto dto) {
+        customerUserService.updatePhoneNumber(id, dto.phoneNumber());
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/password/{userId}")
-    public ResponseEntity<?> updatePassword(@PathVariable Long userId, @Valid @RequestBody PasswordDto dto) {
-        customerUserService.updateHashPassword(userId, dto.password());
+    @PatchMapping("/{id}/password")
+    public ResponseEntity<?> updatePassword(@PathVariable Long id, @Valid @RequestBody PasswordDto dto) {
+        customerUserService.updateHashPassword(id, dto.password());
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/last-login-date/{userId}")
-    public ResponseEntity<?> updateLastLoginDate(@PathVariable Long userId, @Valid @RequestBody LastLoginDateDto dto) {
-        customerUserService.updateLastLoginDate(userId, dto.lastLoginDate());
+    @PatchMapping("/{id}/last-login-date")
+    public ResponseEntity<?> updateLastLoginDate(@PathVariable Long id, @Valid @RequestBody LastLoginDateDto dto) {
+        customerUserService.updateLastLoginDate(id, dto.lastLoginDate());
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/roles/{userId}")
-    public ResponseEntity<?> updateRoles(@PathVariable Long userId, @Valid @RequestBody CustomerUserRolesDto dto) {
-        customerUserService.updateRoles(userId, dto.roles());
+    @PatchMapping("/{id}/accountNonExpired")
+    public ResponseEntity<?> updateAccountNonExpired(@PathVariable Long id, @Valid @RequestBody AccountNonExpiredDto dto) {
+        customerUserService.updateAccountNonExpired(id, Boolean.TRUE.equals(dto.accountNonExpired().booleanValue()));
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/authorities/{userId}")
-    public ResponseEntity<?> updateAuthorities(@PathVariable Long userId, @Valid @RequestBody CustomerUserAuthoritiesDto dto) {
-        customerUserService.updateAuthorities(userId, dto.authorities());
+    @PatchMapping("/{id}/account-non-locked")
+    public ResponseEntity<?> updateAccountNonLocked(@PathVariable Long id, @Valid @RequestBody AccountNonLockedDto dto) {
+        customerUserService.updateAccountNonLocked(id, Boolean.TRUE.equals(dto.accountNonLocked().booleanValue()));
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/account-non-expired/{userId}")
-    public ResponseEntity<?> updateAccountNonExpired(@PathVariable Long userId, @Valid @RequestBody AccountNonExpiredDto dto) {
-        customerUserService.updateAccountNonExpired(userId, Boolean.TRUE.equals(dto.accountNonExpired().booleanValue()));
+    @PatchMapping("/{id}/credentials-non-expired")
+    public ResponseEntity<?> updateCredentialsNonExpired(@PathVariable Long id, @Valid @RequestBody CredentialsNonExpiredDto dto) {
+        customerUserService.updateCredentialsNonExpired(id, Boolean.TRUE.equals(dto.credentialsNonExpired().booleanValue()));
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/account-non-locked/{userId}")
-    public ResponseEntity<?> updateAccountNonLocked(@PathVariable Long userId, @Valid @RequestBody AccountNonLockedDto dto) {
-        customerUserService.updateAccountNonLocked(userId, Boolean.TRUE.equals(dto.accountNonLocked().booleanValue()));
+    @PatchMapping("/{id}/enabled")
+    public ResponseEntity<?> updateEnabled(@PathVariable Long id, @Valid @RequestBody EnabledDto dto) {
+        customerUserService.updateEnabled(id, Boolean.TRUE.equals(dto.enabled().booleanValue()));
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/credentials-non-expired/{userId}")
-    public ResponseEntity<?> updateCredentialsNonExpired(@PathVariable Long userId, @Valid @RequestBody CredentialsNonExpiredDto dto) {
-        customerUserService.updateCredentialsNonExpired(userId, Boolean.TRUE.equals(dto.credentialsNonExpired().booleanValue()));
-        return ResponseEntity.noContent().build();
-    }
-
-    @PatchMapping("/enabled/{userId}")
-    public ResponseEntity<?> updateEnabled(@PathVariable Long userId, @Valid @RequestBody EnabledDto dto) {
-        customerUserService.updateEnabled(userId, Boolean.TRUE.equals(dto.enabled().booleanValue()));
-        return ResponseEntity.noContent().build();
-    }
-
-    @PatchMapping("/add-authority/{userId}")
-    public ResponseEntity<?> addAuthority(@PathVariable Long userId, @Valid @RequestBody CustomerUserAuthorityDto dto) {
-        customerUserService.addAuthority(userId, dto.authority());
-        return ResponseEntity.noContent().build();
-    }
-
-    @PatchMapping("/add-authorities/{userId}")
-    public ResponseEntity<?> addAuthorities(@PathVariable Long userId, @Valid @RequestBody CustomerUserAuthoritiesDto dto) {
-        customerUserService.addAuthorities(userId, dto.authorities());
-        return ResponseEntity.noContent().build();
-    }
-
-    @PatchMapping("/remove-authority/{userId}")
-    public ResponseEntity<?> removeAuthority(@PathVariable Long userId, @Valid @RequestBody CustomerUserAuthorityDto dto) {
-        customerUserService.removeAuthority(userId, dto.authority());
-        return ResponseEntity.noContent().build();
-    }
-
-    @PatchMapping("/remove-authorities/{userId}")
-    public ResponseEntity<?> removeAuthorities(@PathVariable Long userId, @Valid @RequestBody CustomerUserAuthoritiesDto dto) {
-        customerUserService.removeAuthorities(userId, dto.authorities());
-        return ResponseEntity.noContent().build();
-    }
-
-    @PatchMapping("/add-role/{userId}")
+    @PostMapping("/{userId}/roles")
     public ResponseEntity<?> addRole(@PathVariable Long userId, @Valid @RequestBody CustomerUserRoleDto dto) {
         customerUserService.addRole(userId, dto.role());
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/add-roles/{userId}")
+    @PostMapping("/{userId}/roles/batch")
     public ResponseEntity<?> addRoles(@PathVariable Long userId, @Valid @RequestBody CustomerUserRolesDto dto) {
         customerUserService.addRoles(userId, dto.roles());
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/remove-role/{userId}")
+    @DeleteMapping("/{userId}/roles")
     public ResponseEntity<?> removeRole(@PathVariable Long userId, @Valid @RequestBody CustomerUserRoleDto dto) {
         customerUserService.removeRole(userId, dto.role());
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/remove-roles/{userId}")
+    @DeleteMapping("/{userId}/roles/batch")
     public ResponseEntity<?> removeRoles(@PathVariable Long userId, @Valid @RequestBody CustomerUserRolesDto dto) {
         customerUserService.removeRoles(userId, dto.roles());
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/{userId}")
+    @PutMapping("/{userId}/roles")
+    public ResponseEntity<?> updateRoles(@PathVariable Long userId, @Valid @RequestBody CustomerUserRolesDto dto) {
+        customerUserService.updateRoles(userId, dto.roles());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{userId}/authorities")
+    public ResponseEntity<?> addAuthority(@PathVariable Long userId, @Valid @RequestBody CustomerUserAuthorityDto dto) {
+        customerUserService.addAuthority(userId, dto.authority());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{userId}/authorities/batch")
+    public ResponseEntity<?> addAuthorities(@PathVariable Long userId, @Valid @RequestBody CustomerUserAuthoritiesDto dto) {
+        customerUserService.addAuthorities(userId, dto.authorities());
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{userId}/authorities")
+    public ResponseEntity<?> removeAuthority(@PathVariable Long userId, @Valid @RequestBody CustomerUserAuthorityDto dto) {
+        customerUserService.removeAuthority(userId, dto.authority());
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{userId}/authorities/batch")
+    public ResponseEntity<?> removeAuthorities(@PathVariable Long userId, @Valid @RequestBody CustomerUserAuthoritiesDto dto) {
+        customerUserService.removeAuthorities(userId, dto.authorities());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{userId}/authorities")
+    public ResponseEntity<?> updateAuthorities(@PathVariable Long userId, @Valid @RequestBody CustomerUserAuthoritiesDto dto) {
+        customerUserService.updateAuthorities(userId, dto.authorities());
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
         customerUserService.deleteById(userId);
         return ResponseEntity.noContent().build();

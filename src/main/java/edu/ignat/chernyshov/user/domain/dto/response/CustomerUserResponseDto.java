@@ -9,10 +9,11 @@ import edu.ignat.chernyshov.user.domain.entities.CustomerUser;
 
 public record CustomerUserResponseDto(
     Long id,
-    String username,
-    String email,
     String firstName,
     String lastName,
+    String username,
+    String email,
+    String phoneNumber,
     EnumSet<CustomerUserRole> roles,
     EnumSet<CustomerUserAuthority> authorities,
     Boolean accountNonExpired,
@@ -25,12 +26,13 @@ public record CustomerUserResponseDto(
     public static CustomerUserResponseDto from(CustomerUser customerUser) {
         return new CustomerUserResponseDto(
             customerUser.getId(),
-            customerUser.getUsername(),
-            customerUser.getEmail(),
             customerUser.getFirstName(),
             customerUser.getLastName(),
-            EnumSet.copyOf(customerUser.getRoles()),
-            EnumSet.copyOf(customerUser.getAuthoritiesSet()),
+            customerUser.getUsername(),
+            customerUser.getEmail(),
+            customerUser.getPhoneNumber(),
+            customerUser.getRoles().isEmpty() ? EnumSet.noneOf(CustomerUserRole.class) : EnumSet.copyOf(customerUser.getRoles()),
+            customerUser.getAuthorities().isEmpty() ? EnumSet.noneOf(CustomerUserAuthority.class) : EnumSet.copyOf(customerUser.getAuthoritiesSet()),
             customerUser.isAccountNonExpired(),
             customerUser.isAccountNonLocked(),
             customerUser.isCredentialsNonExpired(),

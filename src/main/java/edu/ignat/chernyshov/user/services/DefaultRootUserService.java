@@ -2,8 +2,11 @@ package edu.ignat.chernyshov.user.services;
 
 import java.time.LocalDateTime;
 import java.util.EnumSet;
-import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,11 +14,13 @@ import org.springframework.transaction.annotation.Transactional;
 import edu.ignat.chernyshov.user.domain.authorities.RootUserAuthority;
 import edu.ignat.chernyshov.user.domain.authorities.RootUserRole;
 import edu.ignat.chernyshov.user.domain.dto.request.RootUserCreateDto;
+import edu.ignat.chernyshov.user.domain.dto.request.RootUserFilterDto;
 import edu.ignat.chernyshov.user.domain.dto.request.RootUserUpdateDto;
 import edu.ignat.chernyshov.user.domain.entities.RootUser;
 import edu.ignat.chernyshov.user.exception.exceptions.AlreadyExistsException;
 import edu.ignat.chernyshov.user.exception.exceptions.UserNotFoundException;
 import edu.ignat.chernyshov.user.repositories.RootUserRepository;
+import edu.ignat.chernyshov.user.repositories.specifications.RootUserSpecifications;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -27,8 +32,27 @@ public class DefaultRootUserService implements RootUserService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<RootUser> findAll() {
-        return rootUserRepository.findAll();
+    public Page<RootUser> findByFilters(RootUserFilterDto filters, int page, int size) {
+        Specification<RootUser> specification = (root, query, criteriaBuilder) -> criteriaBuilder.conjunction();
+
+        if (filters.firstName() != null && !filters.firstName().isEmpty()) {
+            specification = specification.and(RootUserSpecifications.hasFirstName(filters.firstName()));
+        }
+        if (filters.lastName() != null && !filters.lastName().isEmpty()) {
+            specification = specification.and(RootUserSpecifications.hasLastName(filters.lastName()));
+        }
+        if (filters.username() != null && !filters.username().isEmpty()) {
+            specification = specification.and(RootUserSpecifications.hasUsername(filters.username()));
+        }
+        if (filters.email() != null && !filters.email().isEmpty()) {
+            specification = specification.and(RootUserSpecifications.hasEmail(filters.email()));
+        }
+        if (filters.phoneNumber() != null && !filters.phoneNumber().isEmpty()) {
+            specification = specification.and(RootUserSpecifications.hasPhoneNumber(filters.phoneNumber()));
+        }
+
+        Pageable pageable = PageRequest.of(page, size);
+        return rootUserRepository.findAll(specification, pageable);
     }
 
     @Override
@@ -36,6 +60,14 @@ public class DefaultRootUserService implements RootUserService {
     public RootUser findById(Long id) {
         return rootUserRepository.findById(id)
             .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с id: " + id));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public RootUser findByUsername(String username) {
+        return rootUserRepository.findByUsername(username)
+            .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с username: " + username));
+    
     }
 
     @Override
@@ -50,14 +82,6 @@ public class DefaultRootUserService implements RootUserService {
     public RootUser findByPhoneNumber(String phoneNumber) {
         return rootUserRepository.findByPhoneNumber(phoneNumber)
             .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с phoneNumber: " + phoneNumber));
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public RootUser findByUsername(String username) {
-        return rootUserRepository.findByUsername(username)
-            .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с username: " + username));
-    
     }
 
     @Override
@@ -153,9 +177,9 @@ public class DefaultRootUserService implements RootUserService {
 
     @Override
     @Transactional
-    public void updatePhoneNumber(Long id, String phoneNumber) {
+    public void updateUsername(Long id, String username) {
         ensureUserExists(id);
-        rootUserRepository.updatePhoneNumber(id, phoneNumber);
+        rootUserRepository.updateUsername(id, username);
     }
 
     @Override
@@ -167,9 +191,9 @@ public class DefaultRootUserService implements RootUserService {
 
     @Override
     @Transactional
-    public void updateUsername(Long id, String username) {
+    public void updatePhoneNumber(Long id, String phoneNumber) {
         ensureUserExists(id);
-        rootUserRepository.updateUsername(id, username);
+        rootUserRepository.updatePhoneNumber(id, phoneNumber);
     }
 
     @Override
@@ -184,26 +208,6 @@ public class DefaultRootUserService implements RootUserService {
     public void updateLastLoginDate(Long id, LocalDateTime lastLoginDate) {
         ensureUserExists(id);
         rootUserRepository.updateLastLoginDate(id, lastLoginDate);
-    }
-
-    @Override
-    @Transactional
-    public void updateRoles(Long id, EnumSet<RootUserRole> roles) {
-        RootUser rootUser = rootUserRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с id: " + id));
-
-        rootUser.setRoles(roles);
-        rootUserRepository.save(rootUser);
-    }
-
-    @Override
-    @Transactional
-    public void updateAuthorities(Long id, EnumSet<RootUserAuthority> authorities) {
-        RootUser rootUser = rootUserRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с id: " + id));
-        
-        rootUser.setAuthorities(authorities);
-        rootUserRepository.save(rootUser);
     }
 
     @Override
@@ -232,6 +236,49 @@ public class DefaultRootUserService implements RootUserService {
     public void updateEnabled(Long id, boolean enabled) {
         ensureUserExists(id);
         rootUserRepository.updateEnabled(id, enabled);
+    }
+
+    @Override
+    @Transactional
+    public void addRole(Long userId, RootUserRole role) {
+        ensureUserExists(userId);
+        rootUserRepository.addRole(userId, role.name());
+    }
+    
+    @Override
+    @Transactional
+    public void addRoles(Long userId, EnumSet<RootUserRole> roles) {
+        ensureUserExists(userId);
+        for (RootUserRole role : roles) {
+            rootUserRepository.addRole(userId, role.name());
+        }
+    }
+
+    @Override
+    @Transactional
+    public void removeRole(Long userId, RootUserRole role) {
+        ensureUserExists(userId);
+        rootUserRepository.removeRole(userId, role.name());
+    }
+
+    @Override
+    @Transactional
+    public void removeRoles(Long userId, EnumSet<RootUserRole> roles) {
+        ensureUserExists(userId);
+        for (RootUserRole role : roles) {
+            rootUserRepository.removeRole(userId, role.name());
+        }
+    }
+
+    @Override
+    @Transactional
+    public void updateRoles(Long userId, EnumSet<RootUserRole> roles) {
+        ensureUserExists(userId);
+
+        rootUserRepository.deleteAllRoles(userId);
+        for (RootUserRole role : roles) {
+            rootUserRepository.addRole(userId, role.name());
+        }
     }
 
     @Override
@@ -268,33 +315,12 @@ public class DefaultRootUserService implements RootUserService {
 
     @Override
     @Transactional
-    public void addRole(Long userId, RootUserRole role) {
+    public void updateAuthorities(Long userId, EnumSet<RootUserAuthority> authorities) {
         ensureUserExists(userId);
-        rootUserRepository.addRole(userId, role.name());
-    }
-    
-    @Override
-    @Transactional
-    public void addRoles(Long userId, EnumSet<RootUserRole> roles) {
-        ensureUserExists(userId);
-        for (RootUserRole role : roles) {
-            rootUserRepository.addRole(userId, role.name());
-        }
-    }
 
-    @Override
-    @Transactional
-    public void removeRole(Long userId, RootUserRole role) {
-        ensureUserExists(userId);
-        rootUserRepository.removeRole(userId, role.name());
-    }
-
-    @Override
-    @Transactional
-    public void removeRoles(Long userId, EnumSet<RootUserRole> roles) {
-        ensureUserExists(userId);
-        for (RootUserRole role : roles) {
-            rootUserRepository.removeRole(userId, role.name());
+        rootUserRepository.deleteAllAuthorities(userId);
+        for (RootUserAuthority authority : authorities) {
+            rootUserRepository.addAuthority(userId, authority.name());
         }
     }
 
