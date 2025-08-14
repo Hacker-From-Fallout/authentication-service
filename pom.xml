@@ -8,10 +8,10 @@
 		<version>3.5.4</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>pro.ignat.chernyshov</groupId>
-	<artifactId>user-service</artifactId>
+	<groupId>com.ignat.chernyshov</groupId>
+	<artifactId>authentication-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>user-service</name>
+	<name>authentication-service</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
 	<licenses>

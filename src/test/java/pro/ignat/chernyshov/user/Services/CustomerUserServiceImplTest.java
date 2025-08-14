@@ -5,8 +5,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import edu.ignat.chernyshov.user.repositories.CustomerUserRepository;
-import edu.ignat.chernyshov.user.services.DefaultCustomerUserService;
+import com.ignat.chernyshov.auth.repositories.CustomerUserRepository;
+import com.ignat.chernyshov.auth.services.DefaultCustomerUserService;
 
 @ExtendWith(MockitoExtension.class)
 public class CustomerUserServiceImplTest {
