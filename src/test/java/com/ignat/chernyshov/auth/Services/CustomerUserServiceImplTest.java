@@ -1,4 +1,4 @@
-package pro.ignat.chernyshov.user.Services;
+package com.ignat.chernyshov.auth.Services;
 
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
