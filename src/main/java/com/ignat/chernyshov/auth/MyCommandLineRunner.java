@@ -18,8 +18,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class MyCommandLineRunner implements CommandLineRunner {
 
-    // TODO переписать переменные в snake_case
-
     //private final CustomerUserRepository customerUserRepository;
 
     private final DefaultCustomerUserService customerUserService;
