@@ -317,7 +317,7 @@ public class DefaultCustomerUserService implements CustomerUserService {
     @Transactional
     public void updateAuthorities(Long userId, EnumSet<CustomerUserAuthority> authorities) {
         ensureUserExists(userId);
-        customerUserRepository.deleteAllRoles(userId);
+        customerUserRepository.deleteAllAuthorities(userId);
 
         for (CustomerUserAuthority authority : authorities) {
             customerUserRepository.addAuthority(userId, authority.name());

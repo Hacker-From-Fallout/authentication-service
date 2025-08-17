@@ -30,7 +30,7 @@ public abstract class User {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_id_sequence")
     @SequenceGenerator(name = "user_id_sequence", sequenceName = "user_id_sequence", allocationSize = 1)
-    @Column(name = "user_id", nullable = false)
+    @Column(name = "id", nullable = false)
     @Setter(AccessLevel.NONE)
     private Long id;
 
