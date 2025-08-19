@@ -44,7 +44,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/seller-user/")
+@RequestMapping("/api/seller-users/")
 public class SellerUserController {
 
     private final SellerUserService sellerUserService;

@@ -13,12 +13,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ignat.chernyshov.auth.domain.authorities.RootUserAuthority;
 import com.ignat.chernyshov.auth.domain.authorities.RootUserRole;
+import com.ignat.chernyshov.auth.domain.dto.kafka.RootProfileCreateDto;
 import com.ignat.chernyshov.auth.domain.dto.request.RootUserCreateDto;
 import com.ignat.chernyshov.auth.domain.dto.request.RootUserFilterDto;
 import com.ignat.chernyshov.auth.domain.dto.request.RootUserUpdateDto;
 import com.ignat.chernyshov.auth.domain.entities.RootUser;
 import com.ignat.chernyshov.auth.exception.exceptions.AlreadyExistsException;
 import com.ignat.chernyshov.auth.exception.exceptions.UserNotFoundException;
+import com.ignat.chernyshov.auth.producers.RootUserProducer;
 import com.ignat.chernyshov.auth.repositories.RootUserRepository;
 import com.ignat.chernyshov.auth.repositories.specifications.RootUserSpecifications;
 
@@ -29,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 public class DefaultRootUserService implements RootUserService {
 
     private final RootUserRepository rootUserRepository;
+    private final RootUserProducer rootUserProducer;
     private final PasswordEncoder bCyPasswordEncoder;
 
     @Override
@@ -87,12 +90,33 @@ public class DefaultRootUserService implements RootUserService {
 
     @Override
     @Transactional
-    public RootUser createUser(RootUserCreateDto dto) {
+    public RootUser createUser(RootUserCreateDto rootDto) {
+        validateUniqueFields(rootDto);
+
+        RootUser rootUser = RootUser(rootDto);
+        rootUser = rootUserRepository.save(rootUser);
+        
+        RootProfileCreateDto profileDto = new RootProfileCreateDto(
+            rootUser.getId(),
+            rootDto.firstName(),
+            rootDto.lastName(),
+            rootDto.username(),
+            rootDto.email(),
+            rootDto.phoneNumber());
+
+        rootUserProducer.createProfile(profileDto);
+
+        return rootUser;
+    }
+
+    private void validateUniqueFields(RootUserCreateDto dto) {
         existsByUsername(dto.username());
         existsByEmail(dto.email());
         existsByPhoneNumber(dto.phoneNumber());
+    }
 
-        RootUser rootUser = RootUser.builder()
+    private RootUser RootUser(RootUserCreateDto dto) {
+        return RootUser.builder()
                 .firstName(dto.firstName())
                 .lastName(dto.lastName())
                 .username(dto.username())
@@ -106,8 +130,6 @@ public class DefaultRootUserService implements RootUserService {
                 .credentialsNonExpired(dto.credentialsNonExpired())
                 .enabled(dto.enabled())
                 .build();
-
-        return rootUserRepository.save(rootUser);
     }
 
     @Override
@@ -180,21 +202,27 @@ public class DefaultRootUserService implements RootUserService {
     @Transactional
     public void updateUsername(Long id, String username) {
         ensureUserExists(id);
+        existsByUsername(username);
         rootUserRepository.updateUsername(id, username);
+        rootUserProducer.updateUsername(id, username);
     }
 
     @Override
     @Transactional
     public void updateEmail(Long id, String email) {
         ensureUserExists(id);
+        existsByEmail(email);
         rootUserRepository.updateEmail(id, email);
+        rootUserProducer.updateEmail(id, email);
     }
 
     @Override
     @Transactional
     public void updatePhoneNumber(Long id, String phoneNumber) {
         ensureUserExists(id);
+        existsByPhoneNumber(phoneNumber);
         rootUserRepository.updatePhoneNumber(id, phoneNumber);
+        rootUserProducer.updatePhoneNumber(id, phoneNumber);
     }
 
     @Override

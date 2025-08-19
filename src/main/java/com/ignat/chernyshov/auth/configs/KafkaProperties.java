@@ -12,41 +12,23 @@ import org.springframework.stereotype.Component;
 public class KafkaProperties {
 
     private List<String> bootstrapServers;
-    private Map<String, String> topics = new HashMap<>();
-
-    public Map<String, String> getTopics() {
-        return topics;
-    }
-
-    public void setTopics(Map<String, String> topics) {
-        this.topics = topics;
-    }
-
-    public String getCreateProfileTopic() {
-        return topics.get("create-profile");
-    }
-
-    public String getUpdateUsernameTopic() {
-        return topics.get("update-username");
-    }
-
-    public String getUpdateEmailTopic() {
-        return topics.get("update-email");
-    }
-
-    public String getUpdatePhoneNumberTopic() {
-        return topics.get("update-phone-number");
-    }
-
-    public String getDeleteProfileTopic() {
-        return topics.get("delete-profile");
-    }
-
+    
     public List<String> getBootstrapServers() {
         return bootstrapServers;
     }
 
     public void setBootstrapServers(List<String> bootstrapServers) {
         this.bootstrapServers = bootstrapServers;
+    }
+
+    public Map<String, Object> getProperties() {
+        Map<String, Object> props = new HashMap<>();
+
+        if (bootstrapServers != null && !bootstrapServers.isEmpty()) {
+            String servers = String.join(",", bootstrapServers);
+            props.put("bootstrap.servers", servers);
+        }
+
+        return props;
     }
 }

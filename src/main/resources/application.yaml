@@ -19,12 +19,27 @@ spring:
     kafka:
         bootstrap-servers: 
             - localhost:9092
+        admin:
+            auto-create: false
         topics:
-            create-profile: create-profile-topic
-            update-username: update-username-topic
-            update-email: update-email-topic
-            update-phone-number: update-phone-number-topic
-            delete-profile: delete-profile-topic
+            customer:
+                create-profile: create-customer-profile-topic
+                update-username: update-customer-username-topic
+                update-email: update-customer-email-topic
+                update-phone-number: update-customer-phone-number-topic
+                delete-profile: delete-customer-profile-topic
+            root:
+                create-profile: create-root-profile-topic
+                update-username: update-root-username-topic
+                update-email: update-root-email-topic
+                update-phone-number: update-root-phone-number-topic
+                delete-profile: delete-root-profile-topic
+            seller:
+                create-profile: create-seller-profile-topic
+                update-username: update-seller-username-topic
+                update-email: update-seller-email-topic
+                update-phone-number: update-seller-phone-number-topic
+                delete-profile: delete-seller-profile-topic
 logging:
     level:
         org:

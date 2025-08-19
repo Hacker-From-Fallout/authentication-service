@@ -1,27 +1,77 @@
 {"properties": [
     {
-        "name": "spring.kafka.topics.delete-profile",
+        "name": "spring.kafka.topics.customer.create-profile",
         "type": "java.lang.String",
-        "description": "A description for 'spring.kafka.topics.delete-profile'"
+        "description": "A description for 'spring.kafka.topics.customer.create-profile'"
     },
     {
-        "name": "spring.kafka.topics.update-phone-number",
+        "name": "spring.kafka.topics.customer.update-username",
         "type": "java.lang.String",
-        "description": "A description for 'spring.kafka.topics.update-phone-number'"
+        "description": "A description for 'spring.kafka.topics.customer.update-username'"
     },
     {
-        "name": "spring.kafka.topics.update-email",
+        "name": "spring.kafka.topics.customer.delete-profile",
         "type": "java.lang.String",
-        "description": "A description for 'spring.kafka.topics.update-email'"
+        "description": "A description for 'spring.kafka.topics.customer.delete-profile'"
     },
     {
-        "name": "spring.kafka.topics.update-username",
+        "name": "spring.kafka.topics.customer.update-phone-number",
         "type": "java.lang.String",
-        "description": "A description for 'spring.kafka.topics.update-username'"
+        "description": "A description for 'spring.kafka.topics.customer.update-phone-number'"
     },
     {
-        "name": "spring.kafka.topics.create-profile",
+        "name": "spring.kafka.topics.customer.update-email",
         "type": "java.lang.String",
-        "description": "A description for 'spring.kafka.topics.create-profile'"
+        "description": "A description for 'spring.kafka.topics.customer.update-email'"
+    },
+    {
+        "name": "spring.kafka.topics.root.create-profile",
+        "type": "java.lang.String",
+        "description": "A description for 'spring.kafka.topics.root.create-profile'"
+    },
+    {
+        "name": "spring.kafka.topics.root.update-username",
+        "type": "java.lang.String",
+        "description": "A description for 'spring.kafka.topics.root.update-username'"
+    },
+    {
+        "name": "spring.kafka.topics.root.update-email",
+        "type": "java.lang.String",
+        "description": "A description for 'spring.kafka.topics.root.update-email'"
+    },
+    {
+        "name": "spring.kafka.topics.root.update-phone-number",
+        "type": "java.lang.String",
+        "description": "A description for 'spring.kafka.topics.root.update-phone-number'"
+    },
+    {
+        "name": "spring.kafka.topics.root.delete-profile",
+        "type": "java.lang.String",
+        "description": "A description for 'spring.kafka.topics.root.delete-profile'"
+    },
+    {
+        "name": "spring.kafka.topics.seller.create-profile",
+        "type": "java.lang.String",
+        "description": "A description for 'spring.kafka.topics.seller.create-profile'"
+    },
+    {
+        "name": "spring.kafka.topics.seller.update-username",
+        "type": "java.lang.String",
+        "description": "A description for 'spring.kafka.topics.seller.update-username'"
+    },
+    {
+        "name": "spring.kafka.topics.seller.delete-profile",
+        "type": "java.lang.String",
+        "description": "A description for 'spring.kafka.topics.seller.delete-profile'"
+    },
+    {
+        "name": "spring.kafka.topics.seller.update-phone-number",
+        "type": "java.lang.String",
+        "description": "A description for 'spring.kafka.topics.seller.update-phone-number'"
+    },
+    {
+        "name": "spring.kafka.topics.seller.update-email",
+        "type": "java.lang.String",
+        "description": "A description for 'spring.kafka.topics.seller.update-email'"
     }
 ]}

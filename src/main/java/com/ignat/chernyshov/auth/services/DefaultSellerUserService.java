@@ -13,12 +13,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ignat.chernyshov.auth.domain.authorities.SellerUserAuthority;
 import com.ignat.chernyshov.auth.domain.authorities.SellerUserRole;
+import com.ignat.chernyshov.auth.domain.dto.kafka.SellerProfileCreateDto;
 import com.ignat.chernyshov.auth.domain.dto.request.SellerUserCreateDto;
 import com.ignat.chernyshov.auth.domain.dto.request.SellerUserFilterDto;
 import com.ignat.chernyshov.auth.domain.dto.request.SellerUserUpdateDto;
 import com.ignat.chernyshov.auth.domain.entities.SellerUser;
 import com.ignat.chernyshov.auth.exception.exceptions.AlreadyExistsException;
 import com.ignat.chernyshov.auth.exception.exceptions.UserNotFoundException;
+import com.ignat.chernyshov.auth.producers.SellerUserProducer;
 import com.ignat.chernyshov.auth.repositories.SellerUserRepository;
 import com.ignat.chernyshov.auth.repositories.specifications.SellerUserSpecifications;
 
@@ -29,12 +31,13 @@ import lombok.RequiredArgsConstructor;
 public class DefaultSellerUserService implements SellerUserService {
 
     private final SellerUserRepository sellerUserRepository;
+    private final SellerUserProducer sellerUserProducer;
     private final PasswordEncoder bCyPasswordEncoder;
 
     @Override
     @Transactional(readOnly = true)
     public Page<SellerUser> findByFilters(SellerUserFilterDto filters, int page, int size) {
-        Specification<SellerUser> specification = (root, query, criteriaBuilder) -> criteriaBuilder.conjunction();
+        Specification<SellerUser> specification = (seller, query, criteriaBuilder) -> criteriaBuilder.conjunction();
 
         if (filters.firstName() != null && !filters.firstName().isEmpty()) {
             specification = specification.and(SellerUserSpecifications.hasFirstName(filters.firstName()));
@@ -87,12 +90,33 @@ public class DefaultSellerUserService implements SellerUserService {
 
     @Override
     @Transactional
-    public SellerUser createUser(SellerUserCreateDto dto) {
+    public SellerUser createUser(SellerUserCreateDto sellerDto) {
+        validateUniqueFields(sellerDto);
+
+        SellerUser sellerUser = SellerUser(sellerDto);
+        sellerUser = sellerUserRepository.save(sellerUser);
+        
+        SellerProfileCreateDto profileDto = new SellerProfileCreateDto(
+            sellerUser.getId(),
+            sellerDto.firstName(),
+            sellerDto.lastName(),
+            sellerDto.username(),
+            sellerDto.email(),
+            sellerDto.phoneNumber());
+
+        sellerUserProducer.createProfile(profileDto);
+
+        return sellerUser;
+    }
+
+    private void validateUniqueFields(SellerUserCreateDto dto) {
         existsByUsername(dto.username());
         existsByEmail(dto.email());
         existsByPhoneNumber(dto.phoneNumber());
+    }
 
-        SellerUser sellerUser = SellerUser.builder()
+    private SellerUser SellerUser(SellerUserCreateDto dto) {
+        return SellerUser.builder()
                 .organizationId(dto.organizationId())
                 .firstName(dto.firstName())
                 .lastName(dto.lastName())
@@ -107,9 +131,8 @@ public class DefaultSellerUserService implements SellerUserService {
                 .credentialsNonExpired(dto.credentialsNonExpired())
                 .enabled(dto.enabled())
                 .build();
-
-        return sellerUserRepository.save(sellerUser);
     }
+
 
     @Override
     @Transactional
@@ -180,22 +203,28 @@ public class DefaultSellerUserService implements SellerUserService {
     @Override
     @Transactional
     public void updateUsername(Long id, String username) {
+        existsByUsername(username);
         ensureUserExists(id);
         sellerUserRepository.updateUsername(id, username);
+        sellerUserProducer.updateUsername(id, username);
     }
 
     @Override
     @Transactional
     public void updateEmail(Long id, String email) {
+        existsByEmail(email);
         ensureUserExists(id);
         sellerUserRepository.updateEmail(id, email);
+        sellerUserProducer.updateEmail(id, email);
     }
 
     @Override
     @Transactional
     public void updatePhoneNumber(Long id, String phoneNumber) {
+        existsByPhoneNumber(phoneNumber);
         ensureUserExists(id);
         sellerUserRepository.updatePhoneNumber(id, phoneNumber);
+        sellerUserProducer.updatePhoneNumber(id, phoneNumber);
     }
 
     @Override
