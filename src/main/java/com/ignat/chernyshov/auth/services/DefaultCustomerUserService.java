@@ -13,12 +13,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ignat.chernyshov.auth.domain.authorities.CustomerUserAuthority;
 import com.ignat.chernyshov.auth.domain.authorities.CustomerUserRole;
+import com.ignat.chernyshov.auth.domain.dto.kafka.CustomerProfileCreateDto;
 import com.ignat.chernyshov.auth.domain.dto.request.CustomerUserCreateDto;
 import com.ignat.chernyshov.auth.domain.dto.request.CustomerUserFilterDto;
 import com.ignat.chernyshov.auth.domain.dto.request.CustomerUserUpdateDto;
 import com.ignat.chernyshov.auth.domain.entities.CustomerUser;
 import com.ignat.chernyshov.auth.exception.exceptions.AlreadyExistsException;
 import com.ignat.chernyshov.auth.exception.exceptions.UserNotFoundException;
+import com.ignat.chernyshov.auth.producers.CustomerUserProducer;
 import com.ignat.chernyshov.auth.repositories.CustomerUserRepository;
 import com.ignat.chernyshov.auth.repositories.specifications.CustomerUserSpecifications;
 
@@ -29,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 public class DefaultCustomerUserService implements CustomerUserService {
 
     private final CustomerUserRepository customerUserRepository;
+    private final CustomerUserProducer customerUserProducer;
     private final PasswordEncoder bCyPasswordEncoder;
 
     @Override
@@ -87,12 +90,33 @@ public class DefaultCustomerUserService implements CustomerUserService {
 
     @Override
     @Transactional
-    public CustomerUser createUser(CustomerUserCreateDto dto) {
+    public CustomerUser createUser(CustomerUserCreateDto customerDto) {
+        validateUniqueFields(customerDto);
+
+        CustomerUser customerUser = buildCustomerUser(customerDto);
+        customerUser = customerUserRepository.save(customerUser);
+        
+        CustomerProfileCreateDto profileDto = new CustomerProfileCreateDto(
+            customerUser.getId(),
+            customerDto.firstName(),
+            customerDto.lastName(),
+            customerDto.username(),
+            customerDto.email(),
+            customerDto.phoneNumber());
+
+        customerUserProducer.createProfile(profileDto);
+
+        return customerUser;
+    }
+
+    private void validateUniqueFields(CustomerUserCreateDto dto) {
         existsByUsername(dto.username());
         existsByEmail(dto.email());
         existsByPhoneNumber(dto.phoneNumber());
+    }
 
-        CustomerUser customerUser = CustomerUser.builder()
+    private CustomerUser buildCustomerUser(CustomerUserCreateDto dto) {
+        return CustomerUser.builder()
                 .firstName(dto.firstName())
                 .lastName(dto.lastName())
                 .username(dto.username())
@@ -106,8 +130,6 @@ public class DefaultCustomerUserService implements CustomerUserService {
                 .credentialsNonExpired(dto.credentialsNonExpired())
                 .enabled(dto.enabled())
                 .build();
-
-        return customerUserRepository.save(customerUser);
     }
 
     @Override
@@ -179,21 +201,27 @@ public class DefaultCustomerUserService implements CustomerUserService {
     @Transactional
     public void updateUsername(Long id, String username) {
         ensureUserExists(id);
+        existsByUsername(username);
         customerUserRepository.updateUsername(id, username);
+        customerUserProducer.updateUsername(id, username);
     }
 
     @Override
     @Transactional
     public void updateEmail(Long id, String email) {
         ensureUserExists(id);
+        existsByEmail(email);
         customerUserRepository.updateEmail(id, email);
+        customerUserProducer.updateEmail(id, email);
     }
 
     @Override
     @Transactional
     public void updatePhoneNumber(Long id, String phoneNumber) {
         ensureUserExists(id);
+        existsByPhoneNumber(phoneNumber);
         customerUserRepository.updatePhoneNumber(id, phoneNumber);
+        customerUserProducer.updatePhoneNumber(id, phoneNumber);
     }
 
     @Override
@@ -328,6 +356,7 @@ public class DefaultCustomerUserService implements CustomerUserService {
     @Transactional
     public void deleteById(Long id){
         customerUserRepository.deleteById(id);
+        customerUserProducer.deleteProfile(id);
     }
 
     private void ensureUserExists(Long id) {

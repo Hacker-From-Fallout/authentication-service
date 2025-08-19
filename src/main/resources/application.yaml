@@ -16,7 +16,15 @@ spring:
                 dialect: org.hibernate.dialect.PostgreSQLDialect
     liquibase:
         change-log: classpath:/db/changelog/db.changelog-master.yaml
-
+    kafka:
+        bootstrap-servers: 
+            - localhost:9092
+        topics:
+            create-profile: create-profile-topic
+            update-username: update-username-topic
+            update-email: update-email-topic
+            update-phone-number: update-phone-number-topic
+            delete-profile: delete-profile-topic
 logging:
     level:
         org:

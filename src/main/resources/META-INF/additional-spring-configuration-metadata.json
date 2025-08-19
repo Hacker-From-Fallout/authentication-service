@@ -1,0 +1,27 @@
+{"properties": [
+    {
+        "name": "spring.kafka.topics.delete-profile",
+        "type": "java.lang.String",
+        "description": "A description for 'spring.kafka.topics.delete-profile'"
+    },
+    {
+        "name": "spring.kafka.topics.update-phone-number",
+        "type": "java.lang.String",
+        "description": "A description for 'spring.kafka.topics.update-phone-number'"
+    },
+    {
+        "name": "spring.kafka.topics.update-email",
+        "type": "java.lang.String",
+        "description": "A description for 'spring.kafka.topics.update-email'"
+    },
+    {
+        "name": "spring.kafka.topics.update-username",
+        "type": "java.lang.String",
+        "description": "A description for 'spring.kafka.topics.update-username'"
+    },
+    {
+        "name": "spring.kafka.topics.create-profile",
+        "type": "java.lang.String",
+        "description": "A description for 'spring.kafka.topics.create-profile'"
+    }
+]}

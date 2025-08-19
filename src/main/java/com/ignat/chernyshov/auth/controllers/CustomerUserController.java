@@ -249,8 +249,8 @@ public class CustomerUserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
-        customerUserService.deleteById(userId);
+    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+        customerUserService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 }

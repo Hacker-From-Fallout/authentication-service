@@ -90,7 +90,6 @@ public interface CustomerUserRepository extends JpaRepository<CustomerUser, Long
     @Query(value = "DELETE FROM customer_user_roles WHERE user_id = :user_id", nativeQuery = true)
     void deleteAllRoles(@Param("user_id") Long userId);
 
-    void deleteAll();
     void deleteById(Long id);
 
     boolean existsById(Long Id);
