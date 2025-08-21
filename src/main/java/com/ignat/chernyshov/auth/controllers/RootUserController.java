@@ -22,9 +22,7 @@ import com.ignat.chernyshov.auth.domain.dto.request.AccountNonLockedDto;
 import com.ignat.chernyshov.auth.domain.dto.request.CredentialsNonExpiredDto;
 import com.ignat.chernyshov.auth.domain.dto.request.EmailDto;
 import com.ignat.chernyshov.auth.domain.dto.request.EnabledDto;
-import com.ignat.chernyshov.auth.domain.dto.request.FirstNameDto;
 import com.ignat.chernyshov.auth.domain.dto.request.LastLoginDateDto;
-import com.ignat.chernyshov.auth.domain.dto.request.LastNameDto;
 import com.ignat.chernyshov.auth.domain.dto.request.PasswordDto;
 import com.ignat.chernyshov.auth.domain.dto.request.PhoneNumberDto;
 import com.ignat.chernyshov.auth.domain.dto.request.RootUserAuthoritiesDto;
@@ -50,7 +48,7 @@ public class RootUserController {
     private final RootUserService rootUserService;
 
     @GetMapping
-    public ResponseEntity<Page<RootUserResponseDto>> getAllUsers(
+    public ResponseEntity<Page<RootUserResponseDto>> getAll(
             @ModelAttribute RootUserFilterDto filters,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
@@ -120,18 +118,6 @@ public class RootUserController {
         
         return ResponseEntity.status(HttpStatus.OK).body(
                 RootUserResponseDto.from(rootUser));
-    }
-
-    @PatchMapping("/{id}/first-name")
-    public ResponseEntity<?> updateFirstName(@PathVariable Long id, @Valid @RequestBody FirstNameDto dto) {
-        rootUserService.updateFirstName(id, dto.firstName());
-        return ResponseEntity.noContent().build();
-    }
-
-    @PatchMapping("/{id}/last-name")
-    public ResponseEntity<?> updateLastName(@PathVariable Long id, @Valid @RequestBody LastNameDto dto) {
-        rootUserService.updateLastName(id, dto.lastName());
-        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}/username")

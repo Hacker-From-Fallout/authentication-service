@@ -20,7 +20,12 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -38,8 +43,19 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @RequiredArgsConstructor
 @SuperBuilder
-@Table(name = "seller_users")
+@Table(name = "seller_users", indexes = {
+    @Index(name = "idx_seller_username", columnList = "username"),
+    @Index(name = "idx_seller_email", columnList = "email"),
+    @Index(name = "idx_seller_phone_number", columnList = "phone_number"),
+})
 public class SellerUser extends User implements UserDetails {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seller_user_id_sequence")
+    @SequenceGenerator(name = "seller_user_id_sequence", sequenceName = "seller_user_id_sequence", allocationSize = 1)
+    @Column(name = "id", nullable = false)
+    @Setter(AccessLevel.NONE)
+    private Long id;
 
     @NonNull
     @Column(name = "organization_id", nullable = false)

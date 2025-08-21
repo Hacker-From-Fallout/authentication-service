@@ -39,12 +39,6 @@ public class DefaultSellerUserService implements SellerUserService {
     public Page<SellerUser> findByFilters(SellerUserFilterDto filters, int page, int size) {
         Specification<SellerUser> specification = (seller, query, criteriaBuilder) -> criteriaBuilder.conjunction();
 
-        if (filters.firstName() != null && !filters.firstName().isEmpty()) {
-            specification = specification.and(SellerUserSpecifications.hasFirstName(filters.firstName()));
-        }
-        if (filters.lastName() != null && !filters.lastName().isEmpty()) {
-            specification = specification.and(SellerUserSpecifications.hasLastName(filters.lastName()));
-        }
         if (filters.username() != null && !filters.username().isEmpty()) {
             specification = specification.and(SellerUserSpecifications.hasUsername(filters.username()));
         }
@@ -118,8 +112,6 @@ public class DefaultSellerUserService implements SellerUserService {
     private SellerUser SellerUser(SellerUserCreateDto dto) {
         return SellerUser.builder()
                 .organizationId(dto.organizationId())
-                .firstName(dto.firstName())
-                .lastName(dto.lastName())
                 .username(dto.username())
                 .email(dto.email())
                 .phoneNumber(dto.phoneNumber())
@@ -140,23 +132,20 @@ public class DefaultSellerUserService implements SellerUserService {
         SellerUser sellerUser = sellerUserRepository.findById(id)
             .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с id: " + id));
 
-            if (dto.firstName() != null) {
-                sellerUser.setFirstName(dto.firstName());
-            }
-            if (dto.lastName() != null) {
-                sellerUser.setLastName(dto.lastName());
-            }
             if (dto.username() != null) {
                 existsByUsername(dto.username());
                 sellerUser.setUsername(dto.username());
+                sellerUserProducer.updateUsername(id, dto.username());
             }
             if (dto.email() != null) {
                 existsByEmail(dto.email());
                 sellerUser.setEmail(dto.email());
+                sellerUserProducer.updateEmail(id, dto.email());
             }
             if (dto.phoneNumber() != null) {
                 existsByPhoneNumber(dto.phoneNumber());
                 sellerUser.setPhoneNumber(dto.phoneNumber());
+                sellerUserProducer.updatePhoneNumber(id, dto.phoneNumber());
             }
             if (dto.password() != null) {
                 sellerUser.setHashPassword(bCyPasswordEncoder.encode(dto.password()));
@@ -184,20 +173,6 @@ public class DefaultSellerUserService implements SellerUserService {
             }
 
             return sellerUserRepository.save(sellerUser);
-    }
-
-    @Override
-    @Transactional
-    public void updateFirstName(Long id, String firstName) {
-        ensureUserExists(id);
-        sellerUserRepository.updateFirstName(id, firstName);
-    }
-
-    @Override
-    @Transactional
-    public void updateLastName(Long id, String lastName) {
-        ensureUserExists(id);
-        sellerUserRepository.updateLastName(id, lastName);
     }
 
     @Override

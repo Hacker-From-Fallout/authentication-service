@@ -22,9 +22,7 @@ import com.ignat.chernyshov.auth.domain.dto.request.AccountNonLockedDto;
 import com.ignat.chernyshov.auth.domain.dto.request.CredentialsNonExpiredDto;
 import com.ignat.chernyshov.auth.domain.dto.request.EmailDto;
 import com.ignat.chernyshov.auth.domain.dto.request.EnabledDto;
-import com.ignat.chernyshov.auth.domain.dto.request.FirstNameDto;
 import com.ignat.chernyshov.auth.domain.dto.request.LastLoginDateDto;
-import com.ignat.chernyshov.auth.domain.dto.request.LastNameDto;
 import com.ignat.chernyshov.auth.domain.dto.request.PasswordDto;
 import com.ignat.chernyshov.auth.domain.dto.request.PhoneNumberDto;
 import com.ignat.chernyshov.auth.domain.dto.request.SellerUserAuthoritiesDto;
@@ -50,7 +48,7 @@ public class SellerUserController {
     private final SellerUserService sellerUserService;
 
     @GetMapping
-    public ResponseEntity<Page<SellerUserResponseDto>> getAllUsers(
+    public ResponseEntity<Page<SellerUserResponseDto>> getAll(
             @ModelAttribute SellerUserFilterDto filters,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
@@ -120,18 +118,6 @@ public class SellerUserController {
         
         return ResponseEntity.status(HttpStatus.OK).body(
                 SellerUserResponseDto.from(sellerUser));
-    }
-
-    @PatchMapping("/{id}/first-name")
-    public ResponseEntity<?> updateFirstName(@PathVariable Long id, @Valid @RequestBody FirstNameDto dto) {
-        sellerUserService.updateFirstName(id, dto.firstName());
-        return ResponseEntity.noContent().build();
-    }
-
-    @PatchMapping("/{id}/last-name")
-    public ResponseEntity<?> updateLastName(@PathVariable Long id, @Valid @RequestBody LastNameDto dto) {
-        sellerUserService.updateLastName(id, dto.lastName());
-        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}/username")

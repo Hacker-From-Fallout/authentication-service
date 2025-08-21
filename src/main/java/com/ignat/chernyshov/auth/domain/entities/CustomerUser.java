@@ -20,8 +20,14 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -37,8 +43,19 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @RequiredArgsConstructor
 @SuperBuilder
-@Table(name = "customer_users")
+@Table(name = "customer_users", indexes = {
+    @Index(name = "idx_customer_username", columnList = "username"),
+    @Index(name = "idx_customer_email", columnList = "email"),
+    @Index(name = "idx_customer_phone_number", columnList = "phone_number"),
+})
 public class CustomerUser extends User implements UserDetails {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "customer_user_id_sequence")
+    @SequenceGenerator(name = "customer_user_id_sequence", sequenceName = "customer_user_id_sequence", allocationSize = 1)
+    @Column(name = "id", nullable = false)
+    @Setter(AccessLevel.NONE)
+    private Long id;
 
     @NonNull
     @ElementCollection(targetClass = CustomerUserRole.class, fetch = FetchType.EAGER)
@@ -109,24 +126,5 @@ public class CustomerUser extends User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return enabled;
-    }
-
-    public String toString() {
-        System.out.println(super.getId());
-        System.out.println(super.getFirstName());
-        System.out.println(super.getLastName());
-        System.out.println(super.getPhoneNumber());
-        System.out.println(super.getEmail());
-        System.out.println(super.getUsername());
-        System.out.println(super.getHashPassword());
-        System.out.println(super.getLastLoginDate());
-        System.out.println(super.getRegistrationDate());
-        System.out.println(accountNonExpired);
-        System.out.println(accountNonLocked);
-        System.out.println(credentialsNonExpired);
-        System.out.println(enabled);
-        System.out.println(getRoles().toString());
-        System.out.println(getAuthorities().toString());
-        return "";
     }
 }

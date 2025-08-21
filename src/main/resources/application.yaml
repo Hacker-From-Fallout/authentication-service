@@ -2,19 +2,21 @@ spring:
     application:
         name: authentication-service
     datasource:
-        url: jdbc:postgresql://localhost:5432/authentication-db
+        url: jdbc:postgresql://localhost:5432/authentication_db
         driver-class-name: org.postgresql.Driver
         username: root
         password: password
     jpa:
         hibernate:
-            ddl-auto: update
+            ddl-auto: none
         show-sql: true
         properties:
             hibernate:
                 format-sql: true
                 dialect: org.hibernate.dialect.PostgreSQLDialect
+                default-schema: public
     liquibase:
+        enabled: true
         change-log: classpath:/db/changelog/db.changelog-master.yaml
     kafka:
         bootstrap-servers: 
@@ -46,3 +48,4 @@ logging:
             springframework:
                 data:
                     jpa: DEBUG
+            liquibase: DEBUG

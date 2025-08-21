@@ -39,12 +39,6 @@ public class DefaultRootUserService implements RootUserService {
     public Page<RootUser> findByFilters(RootUserFilterDto filters, int page, int size) {
         Specification<RootUser> specification = (root, query, criteriaBuilder) -> criteriaBuilder.conjunction();
 
-        if (filters.firstName() != null && !filters.firstName().isEmpty()) {
-            specification = specification.and(RootUserSpecifications.hasFirstName(filters.firstName()));
-        }
-        if (filters.lastName() != null && !filters.lastName().isEmpty()) {
-            specification = specification.and(RootUserSpecifications.hasLastName(filters.lastName()));
-        }
         if (filters.username() != null && !filters.username().isEmpty()) {
             specification = specification.and(RootUserSpecifications.hasUsername(filters.username()));
         }
@@ -117,8 +111,6 @@ public class DefaultRootUserService implements RootUserService {
 
     private RootUser RootUser(RootUserCreateDto dto) {
         return RootUser.builder()
-                .firstName(dto.firstName())
-                .lastName(dto.lastName())
                 .username(dto.username())
                 .email(dto.email())
                 .phoneNumber(dto.phoneNumber())
@@ -138,23 +130,20 @@ public class DefaultRootUserService implements RootUserService {
         RootUser rootUser = rootUserRepository.findById(id)
             .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с id: " + id));
 
-        if (dto.firstName() != null) {
-            rootUser.setFirstName(dto.firstName());
-        }
-        if (dto.lastName() != null) {
-            rootUser.setLastName(dto.lastName());
-        }
         if (dto.username() != null) {
             existsByUsername(dto.username());
             rootUser.setUsername(dto.username());
+            rootUserProducer.updateUsername(id, dto.username());
         }
         if (dto.email() != null) {
             existsByEmail(dto.email());
             rootUser.setEmail(dto.email());
+            rootUserProducer.updateEmail(id, dto.email());
         }
         if (dto.phoneNumber() != null) {
             existsByPhoneNumber(dto.phoneNumber());
             rootUser.setPhoneNumber(dto.phoneNumber());
+            rootUserProducer.updatePhoneNumber(id, dto.phoneNumber());
         }
         if (dto.password() != null) {
             rootUser.setHashPassword(bCyPasswordEncoder.encode(dto.password()));
@@ -182,20 +171,6 @@ public class DefaultRootUserService implements RootUserService {
         }
 
         return rootUserRepository.save(rootUser);
-    }
-
-    @Override
-    @Transactional
-    public void updateFirstName(Long id, String firstName) {
-        ensureUserExists(id);
-        rootUserRepository.updateFirstName(id, firstName);
-    }
-
-    @Override
-    @Transactional
-    public void updateLastName(Long id, String lastName) {
-        ensureUserExists(id);
-        rootUserRepository.updateLastName(id, lastName);
     }
 
     @Override

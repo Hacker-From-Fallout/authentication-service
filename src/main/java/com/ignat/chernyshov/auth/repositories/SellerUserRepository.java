@@ -20,14 +20,6 @@ public interface SellerUserRepository extends JpaRepository<SellerUser, Long>, J
     Optional<SellerUser> findByPhoneNumber(String phoneNumber);
 
     @Modifying
-    @Query(value = "UPDATE seller_users u SET first_name = :first_name WHERE u.id = :id", nativeQuery = true)
-    void updateFirstName(@Param("id") Long id, @Param("first_name") String firstName);
-
-    @Modifying
-    @Query(value = "UPDATE seller_users u SET last_name = :last_name WHERE u.id = :id", nativeQuery = true)
-    void updateLastName(@Param("id") Long id, @Param("last_name") String lastName);
-
-    @Modifying
     @Query(value = "UPDATE seller_users u SET username = :username WHERE u.id = :id", nativeQuery = true)
     void updateUsername(@Param("id") Long id, @Param("username") String username);
 

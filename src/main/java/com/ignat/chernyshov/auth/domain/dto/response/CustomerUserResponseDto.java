@@ -9,8 +9,6 @@ import com.ignat.chernyshov.auth.domain.entities.CustomerUser;
 
 public record CustomerUserResponseDto(
     Long id,
-    String firstName,
-    String lastName,
     String username,
     String email,
     String phoneNumber,
@@ -26,8 +24,6 @@ public record CustomerUserResponseDto(
     public static CustomerUserResponseDto from(CustomerUser customerUser) {
         return new CustomerUserResponseDto(
             customerUser.getId(),
-            customerUser.getFirstName(),
-            customerUser.getLastName(),
             customerUser.getUsername(),
             customerUser.getEmail(),
             customerUser.getPhoneNumber(),

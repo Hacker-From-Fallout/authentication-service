@@ -22,8 +22,6 @@ public interface CustomerUserService {
     CustomerUser createUser(CustomerUserCreateDto dto);
     CustomerUser updateUser(Long id, CustomerUserUpdateDto dto);
 
-    void updateFirstName(Long id, String firstName);
-    void updateLastName(Long id, String lastName);
     void updateUsername(Long id, String username);
     void updateEmail(Long id, String email);
     void updatePhoneNumber(Long id, String phoneNumber);

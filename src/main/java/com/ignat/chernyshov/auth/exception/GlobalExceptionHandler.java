@@ -1,15 +1,22 @@
 package com.ignat.chernyshov.auth.exception;
 
+import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import com.ignat.chernyshov.auth.exception.exceptions.AlreadyExistsException;
@@ -27,7 +34,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(BindException.class)
     public ResponseEntity<ProblemDetail> handleBindException(BindException exception, Locale locale) {
-        log.warn("BindException: {}", exception.getMessage(), exception);
+        log.warn("BindException: {}", exception.getMessage());
         
         ProblemDetail problemDetail = ProblemDetail
             .forStatusAndDetail(HttpStatus.BAD_REQUEST,
@@ -62,6 +69,36 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             .body(ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT,
                 this.messageSource.getMessage(exception.getMessage(), new Object[0],
                     exception.getMessage(), locale)));
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+            MethodArgumentNotValidException exception,
+            HttpHeaders headers,
+            HttpStatusCode status,
+            WebRequest request) {
+
+        log.warn("MethodArgumentNotValidException: {}", exception.getMessage());
+
+        Locale locale = LocaleContextHolder.getLocale();
+
+        List<String> errors = exception.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(fieldError -> {
+                    String message = messageSource.getMessage(fieldError, locale);
+                    return String.format("%s: %s", fieldError.getField(), message);
+                })
+                .collect(Collectors.toList());
+
+        String detailMessage = String.join("; ", errors);
+
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST, 
+                detailMessage
+        );
+
+        return this.handleExceptionInternal(exception, problemDetail, headers, status, request);
     }
 
     @ExceptionHandler(Exception.class)

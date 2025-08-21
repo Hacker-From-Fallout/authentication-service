@@ -59,14 +59,6 @@ public class MyCommandLineRunner implements CommandLineRunner {
         CustomerUser fetchedByPhoneNumber = customerUserService.findByPhoneNumber("+1234567890");
         System.out.println("Получен по phoneNumber: " + fetchedByPhoneNumber);
 
-        // Обновление имени
-        customerUserService.updateFirstName(userId, "Jonathan");
-        System.out.println("Обновлено имя: " + customerUserService.findById(userId).getFirstName());
-
-        // Обновление фамилии
-        customerUserService.updateLastName(userId, "Smith");
-        System.out.println("Обновлена фамилия: " + customerUserService.findById(userId).getLastName());
-
         // Обновление номера телефона
         customerUserService.updatePhoneNumber(userId, "+1987654321");
         System.out.println("Обновлен телефон: " + customerUserService.findById(userId).getPhoneNumber());

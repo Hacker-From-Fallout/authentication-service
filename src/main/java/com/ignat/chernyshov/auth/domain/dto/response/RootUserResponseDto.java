@@ -9,8 +9,6 @@ import com.ignat.chernyshov.auth.domain.entities.RootUser;
 
 public record RootUserResponseDto(
     Long id,
-    String firstName,
-    String lastName,
     String username,
     String email,
     String phoneNumber,
@@ -26,8 +24,6 @@ public record RootUserResponseDto(
     public static RootUserResponseDto from(RootUser rootUser) {
         return new RootUserResponseDto(
             rootUser.getId(),
-            rootUser.getFirstName(),
-            rootUser.getLastName(),
             rootUser.getUsername(),
             rootUser.getEmail(),
             rootUser.getPhoneNumber(),

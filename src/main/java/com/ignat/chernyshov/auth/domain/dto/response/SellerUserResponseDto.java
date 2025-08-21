@@ -10,8 +10,6 @@ import com.ignat.chernyshov.auth.domain.entities.SellerUser;
 public record SellerUserResponseDto(
     Long id,
     Long organizationId,
-    String firstName,
-    String lastName,
     String username,
     String email,
     String phoneNumber,
@@ -28,8 +26,6 @@ public record SellerUserResponseDto(
         return new SellerUserResponseDto(
             sellerUser.getId(),
             sellerUser.getOrganizationId(),
-            sellerUser.getFirstName(),
-            sellerUser.getLastName(),
             sellerUser.getUsername(),
             sellerUser.getEmail(),
             sellerUser.getPhoneNumber(),

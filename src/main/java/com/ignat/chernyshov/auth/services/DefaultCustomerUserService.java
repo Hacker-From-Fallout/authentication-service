@@ -39,12 +39,6 @@ public class DefaultCustomerUserService implements CustomerUserService {
     public Page<CustomerUser> findByFilters(CustomerUserFilterDto filters, int page, int size) {
         Specification<CustomerUser> specification = (root, query, criteriaBuilder) -> criteriaBuilder.conjunction();
 
-        if (filters.firstName() != null && !filters.firstName().isEmpty()) {
-            specification = specification.and(CustomerUserSpecifications.hasFirstName(filters.firstName()));
-        }
-        if (filters.lastName() != null && !filters.lastName().isEmpty()) {
-            specification = specification.and(CustomerUserSpecifications.hasLastName(filters.lastName()));
-        }
         if (filters.username() != null && !filters.username().isEmpty()) {
             specification = specification.and(CustomerUserSpecifications.hasUsername(filters.username()));
         }
@@ -117,8 +111,6 @@ public class DefaultCustomerUserService implements CustomerUserService {
 
     private CustomerUser buildCustomerUser(CustomerUserCreateDto dto) {
         return CustomerUser.builder()
-                .firstName(dto.firstName())
-                .lastName(dto.lastName())
                 .username(dto.username())
                 .email(dto.email())
                 .phoneNumber(dto.phoneNumber())
@@ -138,23 +130,20 @@ public class DefaultCustomerUserService implements CustomerUserService {
         CustomerUser customerUser = customerUserRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с id: " + id));
 
-        if (dto.firstName() != null) {
-            customerUser.setFirstName(dto.firstName());
-        }
-        if (dto.lastName() != null) {
-            customerUser.setLastName(dto.lastName());
-        }
         if (dto.username() != null) {
             existsByUsername(dto.username());
             customerUser.setUsername(dto.username());;
+            customerUserProducer.updateUsername(id, dto.username());
         }
         if (dto.email() != null) {
             existsByEmail(dto.email());
-            customerUser.setEmail(dto.email());;
+            customerUser.setEmail(dto.email());
+            customerUserProducer.updateEmail(id, dto.email());
         }
         if (dto.phoneNumber() != null) {
             existsByPhoneNumber(dto.phoneNumber());
             customerUser.setPhoneNumber(dto.phoneNumber());
+            customerUserProducer.updatePhoneNumber(id, dto.phoneNumber());
         }
         if (dto.password() != null) {
             customerUser.setHashPassword(bCyPasswordEncoder.encode(dto.password()));
@@ -184,19 +173,6 @@ public class DefaultCustomerUserService implements CustomerUserService {
         return customerUserRepository.save(customerUser);
     }
 
-    @Override
-    @Transactional
-    public void updateFirstName(Long id, String firstName) {
-        ensureUserExists(id);
-        customerUserRepository.updateFirstName(id, firstName);
-    }
-
-    @Override
-    @Transactional
-    public void updateLastName(Long id, String lastName) {
-        ensureUserExists(id);
-        customerUserRepository.updateLastName(id, lastName);
-    }
     @Override
     @Transactional
     public void updateUsername(Long id, String username) {

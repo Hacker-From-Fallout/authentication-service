@@ -1,401 +1,502 @@
-# databaseChangeLog:
-#     - changeSet:
-#         id: create-user-id-sequence
-#         author: root
-#         changes:
-#         - createSequence:
-#             sequenceName: user_id_sequence
-#             startValue: 1
+databaseChangeLog:
+    - changeSet:
+        id: trigram-index
+        author: root
+        changes:
+            - sql: |
+                CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
-#     - changeSet:
-#         id: create-customer-users-table
-#         author: root
+    - changeSet:
+        id: create-customer-user-id-sequence
+        author: root
+        changes:
+        - createSequence:
+            sequenceName: customer_user_id_sequence
+            startValue: 1
 
-#         changes:
-#         - createTable:
-#             tableName: customer_users
-#             columns:
-#                 - column:
-#                     name: id
-#                     type: BIGINT
-#                     constraints:
-#                         primaryKey: true
-#                         nullable: false
-#                 - column:
-#                     name: first_name
-#                     type: VARCHAR(255)
-#                     constraints:
-#                         nullable: false
-#                 - column:
-#                     name: last_name
-#                     type: VARCHAR(255)
-#                     constraints:
-#                         nullable: false
-#                 - column:
-#                     name: username
-#                     type: VARCHAR(255)
-#                     constraints:
-#                         nullable: false
-#                         unique: true
-#                 - column:
-#                     name: email
-#                     type: VARCHAR(255)
-#                     constraints:
-#                         nullable: false
-#                         unique: true
-#                 - column:
-#                     name: phone_number
-#                     type: VARCHAR(50)
-#                     constraints:
-#                         nullable: false
-#                         unique: true
-#                 - column:
-#                     name: hash_password
-#                     type: VARCHAR(255)
-#                     constraints:
-#                         nullable: false
-#                 - column:
-#                     name: registration_date
-#                     type: TIMESTAMP
-#                     constraints:
-#                         nullable: false
-#                 - column:
-#                     name: last_login_date
-#                     type: TIMESTAMP
-#                     constraints:
-#                         nullable: false
-#                 - column:
-#                     name: account_non_expired
-#                     type: BOOLEAN
-#                 - column:
-#                     name: account_non_locked
-#                     type: BOOLEAN
-#                 - column:
-#                     name: credentials_non_expired
-#                     type: BOOLEAN
-#                 - column:
-#                     name: enabled
-#                     type: BOOLEAN
+    - changeSet:
+        id: create-customer-users-table
+        author: root
+        preConditions:
+            onFail: MARK_RAN
+            not:
+                - tableExists:
+                    tableName: customer_users
+        changes:
+            - createTable:
+                tableName: customer_users
+                columns:
+                    - column:
+                        name: id
+                        type: BIGINT
+                        constraints:
+                            primaryKey: true
+                            nullable: false
+                        defaultValueSequenceNext: customer_user_id_sequence
+                    - column:
+                        name: username
+                        type: VARCHAR(255)
+                        constraints:
+                            nullable: false
+                            unique: true
+                    - column:
+                        name: email
+                        type: VARCHAR(255)
+                        constraints:
+                            nullable: false
+                            unique: true
+                    - column:
+                        name: phone_number
+                        type: VARCHAR(50)
+                        constraints:
+                            nullable: false
+                            unique: true
+                    - column:
+                        name: hash_password
+                        type: VARCHAR(255)
+                        constraints:
+                            nullable: false
+                    - column:
+                        name: registration_date
+                        type: TIMESTAMP
+                        constraints:
+                            nullable: false
+                    - column:
+                        name: last_login_date
+                        type: TIMESTAMP
+                        constraints:
+                            nullable: false
+                    - column:
+                        name: account_non_expired
+                        type: BOOLEAN
+                    - column:
+                        name: account_non_locked
+                        type: BOOLEAN
+                    - column:
+                        name: credentials_non_expired
+                        type: BOOLEAN
+                    - column:
+                        name: enabled
+                        type: BOOLEAN
+    
+    - changeSet:
+        id: create-trigram-index-customer-username
+        author: root
+        changes:
+            - sql: |
+                CREATE INDEX IF NOT EXISTS idx_customer_username_trgm ON customer_users USING gin (username gin_trgm_ops);
 
-#     - changeSet:
-#         id: create-customer-user-roles-table
-#         author: root
-#         changes:
-#             - createTable:
-#                 tableName: customer_user_roles
-#                 columns:
-#                 - column:
-#                     name: user_id
-#                     type: BIGINT
-#                     constraints:
-#                         nullable: false
-#                 - column:
-#                     name: roles
-#                     type: VARCHAR(50)
-#                     constraints:
-#                         nullable: false
-#             - addForeignKeyConstraint:
-#                 baseTableName: customer_user_roles
-#                 baseColumnNames: user_id
-#                 referencedTableName: customer_users
-#                 referencedColumnNames: id
-#                 constraintName: fk_customer_user_roles_user
-#             - createIndex:
-#                 indexName: idx_customer_user_roles_user_id
-#                 tableName: customer_user_roles
-#                 columns:
-#                 - column:
-#                     name: user_id
+    - changeSet:
+        id: create-trigram-index-customer-email
+        author: root
+        changes:
+            - sql: |
+                CREATE INDEX IF NOT EXISTS idx_customer_email_trgm ON customer_users USING gin (email gin_trgm_ops);
+    
+    - changeSet:
+        id: create-trigram-index-customer-phone_number
+        author: root
+        changes:
+            - sql: |
+                CREATE INDEX IF NOT EXISTS idx_customer_phone_number_trgm ON customer_users USING gin (phone_number gin_trgm_ops);
 
-#     - changeSet:
-#         id: create-customer-user-authorities-table
-#         author: root
-#         changes:
-#             - createTable:
-#                 tableName: customer_user_authorities
-#                 columns:
-#                 - column:
-#                     name: user_id
-#                     type: BIGINT
-#                     constraints:
-#                         nullable: false
-#                 - column:
-#                     name: authorities
-#                     type: VARCHAR(50)
-#                     constraints:
-#                         nullable: false
-#             - addForeignKeyConstraint:
-#                 baseTableName: customer_user_authorities
-#                 baseColumnNames: user_id
-#                 referencedTableName: customer_users
-#                 referencedColumnNames: id
-#                 constraintName: fk_customer_user_authorities_user
-#             - createIndex:
-#                 indexName: idx_customer_user_authorities_user_id
-#                 tableName: customer_user_authorities
-#                 columns:
-#                 - column:
-#                     name: user_id
-#     - changeSet:
-#         id: create-root-user-id-sequence
-#         author: root
-#         changes:
-#             - createSequence:
-#                 sequenceName: root_user_id_sequence
-#                 startValue: 1
+    - changeSet:
+        id: create-customer-user-roles-table
+        author: root
+        preConditions:
+            onFail: MARK_RAN
+            not:
+                - tableExists:
+                    tableName: customer_user_roles
+        changes:
+            - createTable:
+                tableName: customer_user_roles
+                columns:
+                    - column:
+                        name: user_id
+                        type: BIGINT
+                        constraints:
+                            nullable: false
+                    - column:
+                        name: roles
+                        type: VARCHAR(50)
+                        constraints:
+                            nullable: false
+            - addForeignKeyConstraint:
+                baseTableName: customer_user_roles
+                baseColumnNames: user_id
+                referencedTableName: customer_users
+                referencedColumnNames: id
+                constraintName: fk_customer_user_roles_user
+            - createIndex:
+                indexName: idx_customer_roles_user_id
+                tableName: customer_user_roles
+                columns:
+                    - column:
+                        name: user_id
 
-#     - changeSet:
-#         id: create-root-users-table
-#         author: root
-#         changes:
-#             - createTable:
-#                 tableName: root_users
-#                 columns:
-#                 - column:
-#                     name: id
-#                     type: BIGINT
-#                     constraints:
-#                         primaryKey: true
-#                         nullable: false
-#                 - column:
-#                     name: first_name
-#                     type: VARCHAR(255)
-#                     constraints:
-#                         nullable: false
-#                 - column:
-#                     name: last_name
-#                     type: VARCHAR(255)
-#                     constraints:
-#                         nullable: false
-#                 - column:
-#                     name: username
-#                     type: VARCHAR(255)
-#                     constraints:
-#                         nullable: false
-#                         unique: true
-#                 - column:
-#                     name: email
-#                     type: VARCHAR(255)
-#                     constraints:
-#                         nullable: false
-#                         unique: true
-#                 - column:
-#                     name: hash_password
-#                     type: VARCHAR(255)
-#                     constraints:
-#                         nullable: false
-#                 - column:
-#                     name: registration_date
-#                     type: TIMESTAMP
-#                     constraints:
-#                         nullable: false
-#                 - column:
-#                     name: last_login_date
-#                     type: TIMESTAMP
-#                     constraints:
-#                         nullable: false
-#                 - column:
-#                     name: account_non_expired
-#                     type: BOOLEAN
-#                 - column:
-#                     name: account_non_locked
-#                     type: BOOLEAN
-#                 - column:
-#                     name: credentials_non_expired
-#                     type: BOOLEAN
-#                 - column:
-#                     name: enabled
-#                     type: BOOLEAN
+    - changeSet:
+        id: create-customer-user-authorities-table
+        author: root
+        preConditions:
+            onFail: MARK_RAN
+            not:
+                - tableExists:
+                    tableName: customer_user_authorities
+        changes:
+            - createTable:
+                tableName: customer_user_authorities
+                columns:
+                    - column:
+                        name: user_id
+                        type: BIGINT
+                        constraints:
+                            nullable: false
+                    - column:
+                        name: authorities
+                        type: VARCHAR(50)
+                        constraints:
+                            nullable: false
+            - addForeignKeyConstraint:
+                baseTableName: customer_user_authorities
+                baseColumnNames: user_id
+                referencedTableName: customer_users
+                referencedColumnNames: id
+                constraintName: fk_customer_user_authorities_user
+            - createIndex:
+                indexName: idx_customer_authorities_user_id
+                tableName: customer_user_authorities
+                columns:
+                    - column:
+                        name: user_id
+    - changeSet:
+        id: create-root-user-id-sequence
+        author: root
+        changes:
+            - createSequence:
+                sequenceName: root_user_id_sequence
+                startValue: 1
 
-#     - changeSet:
-#         id: create-root-user-roles-table
-#         author: root
-#         changes:
-#             - createTable:
-#                 tableName: root_user_roles
-#                 columns:
-#                 - column:
-#                     name: user_id
-#                     type: BIGINT
-#                     constraints:
-#                         nullable: false
-#                 - column:
-#                     name: roles
-#                     type: VARCHAR(50)
-#                     constraints:
-#                         nullable: false
-#             - addForeignKeyConstraint:
-#                 baseTableName: root_user_roles
-#                 baseColumnNames: user_id
-#                 referencedTableName: root_users
-#                 referencedColumnNames: id
-#                 constraintName: fk_root_user_roles_user
-#             - createIndex:
-#                 indexName: idx_root_user_roles_user_id
-#                 tableName: root_user_roles
-#                 columns:
-#                 - column:
-#                     name: user_id
+    - changeSet:
+        id: create-root-users-table
+        author: root
+        preConditions:
+            onFail: MARK_RAN
+            not:
+                - tableExists:
+                    tableName: root_users
+        changes:
+            - createTable:
+                tableName: root_users
+                columns:
+                    - column:
+                        name: id
+                        type: BIGINT
+                        constraints:
+                            primaryKey: true
+                            nullable: false
+                        defaultValueSequenceNext: root_user_id_sequence
+                    - column:
+                        name: username
+                        type: VARCHAR(255)
+                        constraints:
+                            nullable: false
+                            unique: true
+                    - column:
+                        name: email
+                        type: VARCHAR(255)
+                        constraints:
+                            nullable: false
+                            unique: true
+                    - column:
+                        name: phone_number
+                        type: VARCHAR(50)
+                        constraints:
+                            nullable: false
+                            unique: true
+                    - column:
+                        name: hash_password
+                        type: VARCHAR(255)
+                        constraints:
+                            nullable: false
+                    - column:
+                        name: registration_date
+                        type: TIMESTAMP
+                        constraints:
+                            nullable: false
+                    - column:
+                        name: last_login_date
+                        type: TIMESTAMP
+                        constraints:
+                            nullable: false
+                    - column:
+                        name: account_non_expired
+                        type: BOOLEAN
+                    - column:
+                        name: account_non_locked
+                        type: BOOLEAN
+                    - column:
+                        name: credentials_non_expired
+                        type: BOOLEAN
+                    - column:
+                        name: enabled
+                        type: BOOLEAN
 
-#     - changeSet:
-#         id: create-root-user-authorities-table
-#         author: root
-#         changes:
-#             - createTable:
-#                 tableName: root_user_authorities
-#                 columns:
-#                 - column:
-#                     name: user_id
-#                     type: BIGINT
-#                     constraints:
-#                         nullable: false
-#                 - column:
-#                     name: authorities
-#                     type: VARCHAR(50)
-#                     constraints:
-#                         nullable: false
-#             - addForeignKeyConstraint:
-#                 baseTableName: root_user_authorities
-#                 baseColumnNames: user_id
-#                 referencedTableName: root_users
-#                 referencedColumnNames: id
-#                 constraintName: fk_root_user_authorities_user
-#             - createIndex:
-#                 indexName: idx_root_user_authorities_user_id
-#                 tableName: root_user_authorities
-#                 columns:
-#                 - column:
-#                     name: user_id
-#     - changeSet:
-#         id: create-seller-user-id-sequence
-#         author: root
-#         changes:
-#             - createSequence:
-#                 sequenceName: seller_user_id_sequence
-#                 startValue: 1
+    - changeSet:
+        id: create-trigram-index-root-username
+        author: root
+        changes:
+        - sql: |
+            CREATE INDEX IF NOT EXISTS idx_root_username_trgm ON root_users USING gin (username gin_trgm_ops);
 
-#     - changeSet:
-#         id: create-seller-users-table
-#         author: root
-#         changes:
-#             - createTable:
-#                 tableName: seller_users
-#                 columns:
-#                     - column:
-#                         name: id
-#                         type: BIGINT
-#                         constraints:
-#                             primaryKey: true
-#                             nullable: false
-#                     - column:
-#                         name: organization_id
-#                         type: BIGINT
-#                         constraints:
-#                             nullable: false
-#                     - column:
-#                         name: first_name
-#                         type: VARCHAR(255)
-#                         constraints:
-#                             nullable: false
-#                     - column:
-#                         name: last_name
-#                         type: VARCHAR(255)
-#                         constraints:
-#                             nullable: false
-#                     - column:
-#                         name: username
-#                         type: VARCHAR(255)
-#                         constraints:
-#                             nullable: false
-#                             unique: true
-#                     - column:
-#                         name: email
-#                         type: VARCHAR(255)
-#                         constraints:
-#                             nullable: false
-#                             unique: true
-#                     - column:
-#                         name: hash_password
-#                         type: VARCHAR(255)
-#                         constraints:
-#                             nullable: false
-#                     - column:
-#                         name: registration_date
-#                         type: TIMESTAMP
-#                         constraints:
-#                             nullable: false
-#                     - column:
-#                         name : last_login_date 
-#                         type : TIMESTAMP 
-#                     - column :
-#                         name : account_non_expired 
-#                         type : BOOLEAN 
-#                     - column :
-#                         name : account_non_locked 
-#                         type : BOOLEAN 
-#                     - column :
-#                         name : credentials_non_expired 
-#                         type : BOOLEAN 
-#                     - column :
-#                         name : enabled 
-#                         type : BOOLEAN
+    - changeSet:
+        id: create-trigram-index-root-email
+        author: root
+        changes:
+        - sql: |
+            CREATE INDEX IF NOT EXISTS idx_root_email_trgm ON root_users USING gin (email gin_trgm_ops);
 
-#     - changeSet:
-#         id: create-seller-user-roles-table
-#         author: root
-#         changes:
-#             - createTable:
-#                 tableName : seller_user_roles
-#                 columns :
-#                     - column :
-#                         name : user_id 
-#                         type : BIGINT 
-#                         constraints :
-#                             nullable : false 
-#                     - column :
-#                         name : roles 
-#                         type : VARCHAR(50)
-#                         constraints :
-#                             nullable : false 
-#             - addForeignKeyConstraint :
-#                 baseTableName : seller_user_roles 
-#                 baseColumnNames : user_id 
-#                 referencedTableName : seller_users 
-#                 referencedColumnNames : id 
-#                 constraintName : fk_seller_user_roles_user 
-#             - createIndex :
-#                 indexName : idx_seller_user_roles_user_id 
-#                 tableName : seller_user_roles 
-#                 columns :
-#                     - column :
-#                         name : user_id
+    - changeSet:
+        id: create-trigram-index-root-phone_number
+        author: root
+        changes:
+        - sql: |
+            CREATE INDEX IF NOT EXISTS idx_root_phone_number_trgm ON root_users USING gin (phone_number gin_trgm_ops);
 
-#     - changeSet:
-#         id: create-seller-user-authorities-table
-#         author: root
-#         changes:
-#             - createTable:
-#                 tableName : seller_user_authorities 
-#                 columns :
-#                     - column :
-#                         name : user_id 
-#                         type : BIGINT 
-#                         constraints :
-#                             nullable : false 
-#                     - column :
-#                         name : authorities 
-#                         type : VARCHAR(50)
-#                         constraints :
-#                             nullable : false 
-#             - addForeignKeyConstraint :
-#                 baseTableName : seller_user_authorities 
-#                 baseColumnNames : user_id 
-#                 referencedTableName : seller_users 
-#                 referencedColumnNames : id 
-#                 constraintName : fk_seller_user_authorities_user 
-#             - createIndex :
-#                 indexName : idx_seller_user_authorities_user_id 
-#                 tableName : seller_user_authorities 
-#                 columns :
-#                     - column :
-#                         name : user_id
+    - changeSet:
+        id: create-root-user-roles-table
+        author: root
+        preConditions:
+            onFail: MARK_RAN
+            not:
+                - tableExists:
+                    tableName: root_user_roles
+        changes:
+            - createTable:
+                tableName: root_user_roles
+                columns:
+                    - column:
+                        name: user_id
+                        type: BIGINT
+                        constraints:
+                            nullable: false
+                    - column:
+                        name: roles
+                        type: VARCHAR(50)
+                        constraints:
+                            nullable: false
+            - addForeignKeyConstraint:
+                baseTableName: root_user_roles
+                baseColumnNames: user_id
+                referencedTableName: root_users
+                referencedColumnNames: id
+                constraintName: fk_root_user_roles_user
+            - createIndex:
+                indexName: idx_root_roles_user_id
+                tableName: root_user_roles
+                columns:
+                    - column:
+                        name: user_id
+
+    - changeSet:
+        id: create-root-user-authorities-table
+        author: root
+        preConditions:
+            onFail: MARK_RAN
+            not:
+                - tableExists:
+                    tableName: root_user_authorities
+        changes:
+            - createTable:
+                tableName: root_user_authorities
+                columns:
+                    - column:
+                        name: user_id
+                        type: BIGINT
+                        constraints:
+                            nullable: false
+                    - column:
+                        name: authorities
+                        type: VARCHAR(50)
+                        constraints:
+                            nullable: false
+            - addForeignKeyConstraint:
+                baseTableName: root_user_authorities
+                baseColumnNames: user_id
+                referencedTableName: root_users
+                referencedColumnNames: id
+                constraintName: fk_root_user_authorities_user
+            - createIndex:
+                indexName: idx_root_authorities_user_id
+                tableName: root_user_authorities
+                columns:
+                    - column:
+                        name: user_id
+
+    - changeSet:
+        id: create-seller-user-id-sequence
+        author: root
+        changes:
+            - createSequence:
+                sequenceName: seller_user_id_sequence
+                startValue: 1
+
+    - changeSet:
+        id: create-seller-users-table
+        author: root
+        preConditions:
+            onFail: MARK_RAN
+            not:
+                - tableExists:
+                    tableName: seller_users
+        changes:
+            - createTable:
+                tableName: seller_users
+                columns:
+                    - column:
+                        name: id
+                        type: BIGINT
+                        constraints:
+                            primaryKey: true
+                            nullable: false
+                        defaultValueSequenceNext: seller_user_id_sequence
+                    - column:
+                        name: organization_id
+                        type: BIGINT
+                        constraints:
+                            nullable: false
+                    - column:
+                        name: username
+                        type: VARCHAR(255)
+                        constraints:
+                            nullable: false
+                            unique: true
+                    - column:
+                        name: email
+                        type: VARCHAR(255)
+                        constraints:
+                            nullable: false
+                            unique: true
+                    - column:
+                        name: phone_number
+                        type: VARCHAR(50)
+                        constraints:
+                            nullable: false
+                            unique: true
+                    - column:
+                        name: hash_password
+                        type: VARCHAR(255)
+                        constraints:
+                            nullable: false
+                    - column:
+                        name: registration_date
+                        type: TIMESTAMP
+                        constraints:
+                            nullable: false
+                    - column:
+                        name : last_login_date 
+                        type : TIMESTAMP 
+                    - column :
+                        name : account_non_expired 
+                        type : BOOLEAN 
+                    - column :
+                        name : account_non_locked 
+                        type : BOOLEAN 
+                    - column :
+                        name : credentials_non_expired 
+                        type : BOOLEAN 
+                    - column :
+                        name : enabled 
+                        type : BOOLEAN
+
+    - changeSet:
+        id: create-trigram-index-seller-username
+        author: seller
+        changes:
+        - sql: |
+            CREATE EXTENSION IF NOT EXISTS pg_trgm;
+            CREATE INDEX IF NOT EXISTS idx_seller_username_trgm ON seller_users USING gin (username gin_trgm_ops);
+
+    - changeSet:
+        id: create-trigram-index-seller-email
+        author: seller
+        changes:
+        - sql: |
+            CREATE INDEX IF NOT EXISTS idx_seller_email_trgm ON seller_users USING gin (email gin_trgm_ops);
+
+    - changeSet:
+        id: create-trigram-index-seller-phone_number
+        author: seller
+        changes:
+        - sql: |
+            CREATE INDEX IF NOT EXISTS idx_seller_phone_number_trgm ON seller_users USING gin (phone_number gin_trgm_ops);
+
+    - changeSet:
+        id: create-seller-user-roles-table
+        author: root
+        preConditions:
+            onFail: MARK_RAN
+            not:
+                - tableExists:
+                    tableName: seller_user_roles
+        changes:
+            - createTable:
+                tableName : seller_user_roles
+                columns :
+                    - column :
+                        name : user_id 
+                        type : BIGINT 
+                        constraints :
+                            nullable : false 
+                    - column :
+                        name : roles 
+                        type : VARCHAR(50)
+                        constraints :
+                            nullable : false 
+            - addForeignKeyConstraint :
+                baseTableName : seller_user_roles 
+                baseColumnNames : user_id 
+                referencedTableName : seller_users 
+                referencedColumnNames : id 
+                constraintName : fk_seller_user_roles_user 
+            - createIndex :
+                indexName : idx_seller_roles_user_id 
+                tableName : seller_user_roles 
+                columns :
+                    - column:
+                        name: user_id
+
+    - changeSet:
+        id: create-seller-user-authorities-table
+        author: root
+        preConditions:
+            onFail: MARK_RAN
+            not:
+                - tableExists:
+                    tableName: seller_user_authorities
+        changes:
+            - createTable:
+                tableName : seller_user_authorities 
+                columns :
+                    - column :
+                        name : user_id 
+                        type : BIGINT 
+                        constraints :
+                            nullable : false 
+                    - column :
+                        name : authorities 
+                        type : VARCHAR(50)
+                        constraints :
+                            nullable : false 
+            - addForeignKeyConstraint :
+                baseTableName : seller_user_authorities 
+                baseColumnNames : user_id 
+                referencedTableName : seller_users 
+                referencedColumnNames : id 
+                constraintName : fk_seller_user_authorities_user 
+            - createIndex :
+                indexName : idx_seller_authorities_user_id 
+                tableName : seller_user_authorities 
+                columns :
+                    - column:
+                        name: user_id

@@ -37,18 +37,18 @@ public class CustomerUserProducer {
         jsonKafkaTemplate.send(CREATE_PROFILE_CUSTOMER_TOPIC, dto);
     }
 
-    public void updateUsername(Long id, String newUsername) {
-        UserUsernameUpdateDto dto = new UserUsernameUpdateDto(id, newUsername);
+    public void updateUsername(Long id, String username) {
+        UserUsernameUpdateDto dto = new UserUsernameUpdateDto(id, username);
         jsonKafkaTemplate.send(UPDATE_USERNAME_CUSTOMER_TOPIC, dto);
     }
 
-    public void updateEmail(Long id, String newEmail) {
-        UserEmailUpdateDto dto = new UserEmailUpdateDto(id, newEmail);
+    public void updateEmail(Long id, String email) {
+        UserEmailUpdateDto dto = new UserEmailUpdateDto(id, email);
         jsonKafkaTemplate.send(UPDATE_EMAIL_CUSTOMER_TOPIC, dto);
     }
 
-    public void updatePhoneNumber(Long id, String newPhoneNumber) {
-        UserPhoneNumberUpdateDto dto = new UserPhoneNumberUpdateDto(id, newPhoneNumber);
+    public void updatePhoneNumber(Long id, String phoneNumber) {
+        UserPhoneNumberUpdateDto dto = new UserPhoneNumberUpdateDto(id, phoneNumber);
         jsonKafkaTemplate.send(UPDATE_PHONE_NUMBER_CUSTOMER_TOPIC, dto);
     }
 

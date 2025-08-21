@@ -26,9 +26,7 @@ import com.ignat.chernyshov.auth.domain.dto.request.CustomerUserRolesDto;
 import com.ignat.chernyshov.auth.domain.dto.request.CustomerUserUpdateDto;
 import com.ignat.chernyshov.auth.domain.dto.request.EmailDto;
 import com.ignat.chernyshov.auth.domain.dto.request.EnabledDto;
-import com.ignat.chernyshov.auth.domain.dto.request.FirstNameDto;
 import com.ignat.chernyshov.auth.domain.dto.request.LastLoginDateDto;
-import com.ignat.chernyshov.auth.domain.dto.request.LastNameDto;
 import com.ignat.chernyshov.auth.domain.dto.request.PasswordDto;
 import com.ignat.chernyshov.auth.domain.dto.request.PhoneNumberDto;
 import com.ignat.chernyshov.auth.domain.dto.request.UsernameDto;
@@ -44,13 +42,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/customer-users/")
+@RequestMapping("/api/customer-users")
 public class CustomerUserController {
 
     private final CustomerUserService customerUserService;
 
     @GetMapping
-    public ResponseEntity<Page<CustomerUserResponseDto>> getAllUsers(
+    public ResponseEntity<Page<CustomerUserResponseDto>> getAll(
             @ModelAttribute CustomerUserFilterDto filters,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
@@ -120,18 +118,6 @@ public class CustomerUserController {
         
         return ResponseEntity.status(HttpStatus.OK).body(
                 CustomerUserResponseDto.from(customerUser));
-    }
-
-    @PatchMapping("/{id}/first-name")
-    public ResponseEntity<?> updateFirstName(@PathVariable Long id, @Valid @RequestBody FirstNameDto dto) {
-        customerUserService.updateFirstName(id, dto.firstName());
-        return ResponseEntity.noContent().build();
-    }
-
-    @PatchMapping("/{id}/last-name")
-    public ResponseEntity<?> updateLastName(@PathVariable Long id, @Valid @RequestBody LastNameDto dto) {
-        customerUserService.updateLastName(id, dto.lastName());
-        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}/username")
