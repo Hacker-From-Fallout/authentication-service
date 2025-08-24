@@ -42,6 +42,8 @@ spring:
                 update-email: update-seller-email-topic
                 update-phone-number: update-seller-phone-number-topic
                 delete-profile: delete-seller-profile-topic
+            email-confirmation: email-confirmation-topic
+            phone-number-confirmation: phone-number-confirmation-topic
 logging:
     level:
         org:

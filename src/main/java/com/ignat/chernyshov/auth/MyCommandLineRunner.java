@@ -8,8 +8,10 @@ import org.springframework.stereotype.Component;
 
 import com.ignat.chernyshov.auth.domain.authorities.CustomerUserAuthority;
 import com.ignat.chernyshov.auth.domain.authorities.CustomerUserRole;
+//import com.ignat.chernyshov.auth.domain.dto.kafka.EmailConfirmationCodeDto;
 import com.ignat.chernyshov.auth.domain.dto.request.CustomerUserCreateDto;
 import com.ignat.chernyshov.auth.domain.entities.CustomerUser;
+//import com.ignat.chernyshov.auth.producers.ConfirmationProducer;
 import com.ignat.chernyshov.auth.services.DefaultCustomerUserService;
 
 import lombok.RequiredArgsConstructor;
@@ -21,10 +23,12 @@ public class MyCommandLineRunner implements CommandLineRunner {
     //private final CustomerUserRepository customerUserRepository;
 
     private final DefaultCustomerUserService customerUserService;
+    //private final ConfirmationProducer confirmationProducer;
 
     @Override
     public void run(String... args) throws Exception {
 
+        //confirmationProducer.emailConfirmation(new EmailConfirmationCodeDto("chernyshovignat87@gmail.com", "0175123"));
         // runDemo();
         // customerUserRepository.deleteAll();
     }

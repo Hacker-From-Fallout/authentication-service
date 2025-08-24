@@ -73,5 +73,15 @@
         "name": "spring.kafka.topics.seller.update-email",
         "type": "java.lang.String",
         "description": "A description for 'spring.kafka.topics.seller.update-email'"
+    },
+    {
+        "name": "spring.kafka.topics.email-confirmation",
+        "type": "java.lang.String",
+        "description": "A description for 'spring.kafka.topics.email-confirmation'"
+    },
+    {
+        "name": "spring.kafka.topics.phone-number-confirmation",
+        "type": "java.lang.String",
+        "description": "A description for 'spring.kafka.topics.phone-number-confirmation'"
     }
 ]}

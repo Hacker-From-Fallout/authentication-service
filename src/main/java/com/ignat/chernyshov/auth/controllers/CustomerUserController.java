@@ -47,6 +47,11 @@ public class CustomerUserController {
 
     private final CustomerUserService customerUserService;
 
+    @GetMapping("/test")
+    public String test() {
+        return "test";
+    }
+
     @GetMapping
     public ResponseEntity<Page<CustomerUserResponseDto>> getAll(
             @ModelAttribute CustomerUserFilterDto filters,
